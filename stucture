@@ -1,0 +1,39 @@
+crasm/
+│
+├── admin/
+│   ├── dashboard.php
+│   ├── authority.php
+│   ├── reports.php
+│   ├── backup.php
+│   ├── activity_logs.php
+│   └── login.php
+│
+├── config/
+│   ├── database.php
+│   └── auth.php
+│
+├── actions/
+│   ├── login.php
+│   ├── logout.php
+│   ├── authority_save.php
+│   ├── authority_update.php
+│   ├── authority_delete.php
+│   ├── backup_create.php
+│   └── backup_restore.php
+│
+├── includes/
+│   ├── sidebar.php
+│   
+│
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── script.js
+│   └── img/
+│
+├── database/
+│   └── crasm.sql
+│
+├── logout.php
+└── login.php

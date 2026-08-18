@@ -1,0 +1,23 @@
+# Git
+.git/
+.github/
+
+# Environment and configuration
+.env
+.env.*
+
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
