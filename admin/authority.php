@@ -119,9 +119,12 @@ data-bs-target="#sidebarOffcanvas"
                             <option value="<?php echo htmlspecialchars($year); ?>"><?php echo htmlspecialchars($year); ?></option>
                             <?php endforeach; ?>
                         </select>
-                        <button type="button" class="btn btn-sm text-white ms-auto" style="background-color:#0a1f44;font-size:11px;" data-bs-toggle="modal" data-bs-target="#addAuthorityModal">
-                            <i class="fa-solid fa-plus me-1"></i> Add Authority
-                        </button>
+                        <a href="../actions/authority_export_word.php" class="btn btn-sm text-white" style="background-color:#2b5797;font-size:11px;">
+    <i class="fa-solid fa-file-word me-1"></i> Export to Word
+</a>
+<button type="button" class="btn btn-sm text-white" style="background-color:#0a1f44;font-size:11px;" data-bs-toggle="modal" data-bs-target="#addAuthorityModal">
+    <i class="fa-solid fa-plus me-1"></i> Add Authority
+</button>
                     </div>
                 </div>
             </div>

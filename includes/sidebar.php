@@ -13,7 +13,7 @@
         <div class="d-flex align-items-center">
 
             <img
-                src="../assets/img/logo.webp"
+                src="../assets/img/logo.png"
                 alt="Seal"
                 style="width:32px;height:32px;object-fit:contain;flex-shrink:0;"
                 class="me-2"
