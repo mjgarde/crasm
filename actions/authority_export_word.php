@@ -33,7 +33,7 @@ $SHEET_LABEL       = 'Sheet 1 of 1 sheets';
 
 $PREPARED_BY_NAME  = 'MICHAEL A. MAMA';
 $PREPARED_BY_TITLE = 'Administrative Aide VI (COSW)';
-$REVIEWED_BY_NAME  = 'SHYLA MARIE M. DETICIO';
+$REVIEWED_BY_NAME  = 'JIMIL J. KANI';
 $REVIEWED_BY_TITLE = 'OIC-Chief, CRASD';
 $APPROVED_BY_NAME  = 'ATTY. MAQTAHAR L. MANULON, CESO V';
 $APPROVED_BY_TITLE = 'Regional Director';
@@ -89,6 +89,22 @@ $params = [];
 if (!empty($_GET['province'])) {
     $where[] = 'provinces = :province';
     $params[':province'] = $_GET['province'];
+}
+if (!empty($_GET['sect'])) {
+    $where[] = 'religious_sect = :sect';
+    $params[':sect'] = $_GET['sect'];
+}
+if (!empty($_GET['type'])) {
+    $where[] = 'type = :type';
+    $params[':type'] = $_GET['type'];
+}
+if (!empty($_GET['sex'])) {
+    $where[] = 'sex = :sex';
+    $params[':sex'] = $_GET['sex'];
+}
+if (!empty($_GET['month'])) {
+    $where[] = "MONTH(approved) = :month"; // MySQL
+    $params[':month'] = $_GET['month'];
 }
 if (!empty($_GET['year'])) {
     $where[] = "YEAR(approved) = :year"; // MySQL
@@ -202,16 +218,25 @@ $bodyXml .= '<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r>'
     . '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="16"/></w:rPr>'
     . '<w:t>DSCIS Form 2 (RO)</w:t></w:r></w:p>';
 
-// --- Title block: text centered, logo floated top-right via anchor ---
+// --- Title block: text centered, logo positioned ---
 $logoDrawing = '';
 if ($hasLogo) {
     $emuW = pxToEmu(70);
     $emuH = $logoHeight > 0 ? (int) round($emuW * ($logoHeight / $logoWidth)) : pxToEmu(70);
+    
+    // Edit these two values to move the logo
+    $xPos = 6286500;   // ← 20px RIGHT
+    
+    // Y POSITION - Using relativeFrom="margin"
+    // 0 = at top margin, negative = above margin (up), positive = below margin (down)
+    // 1px = 10 EMU
+    $yOffset = -200;   // ← 20px ABOVE top margin (adjust this)
+    
     $logoDrawing = '<w:r><w:rPr><w:noProof/></w:rPr><w:drawing>'
-        . '<wp:anchor behindDoc="0" distT="0" distB="0" distL="114300" distR="0" simplePos="0" locked="0" layoutInCell="1" allowOverlap="1" relativeHeight="1">'
+        . '<wp:anchor behindDoc="0" distT="0" distB="0" distL="0" distR="0" simplePos="0" locked="0" layoutInCell="1" allowOverlap="1" relativeHeight="1">'
         . '<wp:simplePos x="0" y="0"/>'
-        . '<wp:positionH relativeFrom="column"><wp:align>right</wp:align></wp:positionH>'
-        . '<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>'
+        . '<wp:positionH relativeFrom="page"><wp:posOffset>' . $xPos . '</wp:posOffset></wp:positionH>'
+        . '<wp:positionV relativeFrom="margin"><wp:posOffset>' . $yOffset . '</wp:posOffset></wp:positionV>'
         . '<wp:extent cx="' . $emuW . '" cy="' . $emuH . '"/>'
         . '<wp:wrapNone/>'
         . '<wp:docPr id="1" name="PSA Logo"/>'
@@ -423,7 +448,28 @@ XML;
 /* =========================================================
    7. BUILD ZIP (DOCX) AND STREAM
    ========================================================= */
-$filename = 'DSCIS_Form2_RO_' . date('Ymd_His') . '.docx';
+// Generate filename based on the Month/Year filters currently applied.
+// Examples: CRASM REPORTS (ALL MONTHS 2023).docx
+//           CRASM REPORTS (FEBRUARY 2023).docx
+//           CRASM REPORTS (ALL MONTHS ALL YEARS).docx
+$monthNames = [
+    '01' => 'JANUARY', '02' => 'FEBRUARY', '03' => 'MARCH',
+    '04' => 'APRIL',   '05' => 'MAY',      '06' => 'JUNE',
+    '07' => 'JULY',    '08' => 'AUGUST',   '09' => 'SEPTEMBER',
+    '10' => 'OCTOBER', '11' => 'NOVEMBER', '12' => 'DECEMBER',
+];
+
+$monthParam = $_GET['month'] ?? '';
+$yearParam  = $_GET['year'] ?? '';
+
+$monthLabel = ($monthParam !== '' && isset($monthNames[$monthParam]))
+    ? $monthNames[$monthParam]
+    : 'ALL MONTHS';
+
+$yearLabel = ($yearParam !== '') ? $yearParam : 'ALL YEARS';
+
+$filename = 'CRASM REPORTS (' . $monthLabel . ' ' . $yearLabel . ').docx';
+
 $tmpFile = tempnam(sys_get_temp_dir(), 'docx_');
 
 $zip = new ZipArchive();

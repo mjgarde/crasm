@@ -18,7 +18,6 @@ $database = new Database();
 $db = $database->connect();
 
 $fields = [
-    'no',
     'crasm_no',
     'name_of_so',
     'provinces',
@@ -46,12 +45,19 @@ foreach ($fields as $field) {
     $data[$field] = $value === '' ? null : $value;
 }
 
-$columns = implode(', ', $fields);
-$placeholders = ':' . implode(', :', $fields);
+// Auto-assign "no" based on order added (next number after the highest existing one).
+$noStmt = $db->query("SELECT MAX(no) AS max_no FROM authority_records");
+$maxNo = $noStmt->fetch(PDO::FETCH_ASSOC)['max_no'] ?? 0;
+$data['no'] = (int) $maxNo + 1;
+
+$allFields = array_merge(['no'], $fields);
+
+$columns = implode(', ', $allFields);
+$placeholders = ':' . implode(', :', $allFields);
 
 $stmt = $db->prepare("INSERT INTO authority_records ($columns) VALUES ($placeholders)");
 
-foreach ($fields as $field) {
+foreach ($allFields as $field) {
     $stmt->bindValue(':' . $field, $data[$field]);
 }
 

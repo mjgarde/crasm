@@ -28,6 +28,21 @@ $authorityRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $sectStmt = $db->query("SELECT DISTINCT religious_sect FROM authority_records WHERE religious_sect IS NOT NULL AND religious_sect <> '' ORDER BY religious_sect ASC");
 $religiousSects = $sectStmt->fetchAll(PDO::FETCH_COLUMN);
 
+$months = [
+    '01' => 'January',
+    '02' => 'February',
+    '03' => 'March',
+    '04' => 'April',
+    '05' => 'May',
+    '06' => 'June',
+    '07' => 'July',
+    '08' => 'August',
+    '09' => 'September',
+    '10' => 'October',
+    '11' => 'November',
+    '12' => 'December'
+];
+
 ?>
 
 <!DOCTYPE html>
@@ -40,15 +55,45 @@ $religiousSects = $sectStmt->fetchAll(PDO::FETCH_COLUMN);
 <link href="../assets/vendor/bootstrap-5.3.8/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/vendor/fontawesome-free-7.3.1/css/all.min.css">
 <style>
+.filter-row {
+    font-size: 14px;
+}
+.filter-row select,
+.filter-row .input-group,
+.filter-row .form-control,
+.filter-row .form-select {
+    font-size: 14px !important;
+}
+.filter-row .btn {
+    font-size: 13px !important;
+}
 @media (max-width: 768px) {
-    #filterProvince, #filterSect, #filterType, #filterSex, #filterYear {
+    #filterProvince, #filterSect, #filterType, #filterSex, #filterYear, #filterMonth, #filterSort {
         min-width: 0 !important;
         max-width: none !important;
-        flex: 1 1 45%;
+        flex: 1 1 30%;
     }
     #searchInput, .input-group.input-group-sm.flex-grow-1 {
         max-width: none !important;
         flex: 1 1 100%;
+    }
+    .filter-row.d-flex {
+        font-size: 11px;
+    }
+    .filter-row .btn {
+        font-size: 10px !important;
+        padding: 0.25rem 0.4rem !important;
+    }
+    .filter-row select, .filter-row .input-group {
+        font-size: 11px !important;
+    }
+}
+@media (max-width: 576px) {
+    #filterProvince, #filterSect, #filterType, #filterSex, #filterYear, #filterMonth, #filterSort {
+        flex: 1 1 45% !important;
+    }
+    .filter-row select, .filter-row .input-group {
+        font-size: 10px !important;
     }
 }
 </style>
@@ -56,172 +101,187 @@ $religiousSects = $sectStmt->fetchAll(PDO::FETCH_COLUMN);
 
 <body>
 
-<div class="d-flex">
+<?php require __DIR__ . '/../includes/navbar.php'; ?>
 
-<?php require __DIR__ . '/../includes/sidebar.php'; ?>
+<div class="bg-light min-vh-100">
 
-    <div class="flex-grow-1 bg-light">
+    <main class="p-3 p-md-4">
 
-        <div class="d-lg-none border-bottom bg-white px-3 py-3">
-            <button
-class="btn btn-outline-secondary btn-sm"
-type="button"
-data-bs-toggle="offcanvas"
-data-bs-target="#sidebarOffcanvas"
-            >
-                <i class="fa-solid fa-bars"></i>
-            </button>
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body py-2">
+                <div class="filter-row d-flex flex-wrap align-items-center gap-2">
+                    <!-- Search -->
+                    <div class="input-group input-group-sm flex-grow-1" style="min-width:120px;max-width:200px;">
+                        <span class="input-group-text bg-white px-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size:10px;"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+                    </div>
+                    
+                    <!-- Province -->
+                    <select id="filterProvince" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:130px;">
+                        <option value="">All Provinces</option>
+                        <?php foreach ($provinces as $province): ?>
+                        <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <!-- Religious Sect -->
+                    <select id="filterSect" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:140px;">
+                        <option value="">All Sects</option>
+                        <?php foreach ($religiousSects as $sect): ?>
+                        <option value="<?php echo htmlspecialchars($sect); ?>"><?php echo htmlspecialchars($sect); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <!-- Type -->
+                    <select id="filterType" class="form-select form-select-sm" style="width:auto;min-width:80px;max-width:100px;">
+                        <option value="">All Types</option>
+                        <option value="New">New</option>
+                        <option value="Renewal">Renewal</option>
+                    </select>
+                    
+                    <!-- Sex -->
+                    <select id="filterSex" class="form-select form-select-sm" style="width:auto;min-width:75px;max-width:90px;">
+                        <option value="">All Sex</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    
+                    <!-- Month -->
+                    <select id="filterMonth" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:120px;">
+                        <option value="">All Months</option>
+                        <?php foreach ($months as $num => $name): ?>
+                        <option value="<?php echo $num; ?>"><?php echo htmlspecialchars($name); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <!-- Year -->
+                    <select id="filterYear" class="form-select form-select-sm" style="width:auto;min-width:90px;max-width:110px;">
+                        <option value="">All Years</option>
+                        <?php
+                        $years = [];
+                        foreach ($authorityRecords as $r) {
+                            if (!empty($r['approved'])) {
+                                $years[substr($r['approved'], 0, 4)] = true;
+                            }
+                        }
+                        krsort($years);
+                        foreach (array_keys($years) as $year):
+                        ?>
+                        <option value="<?php echo htmlspecialchars($year); ?>"><?php echo htmlspecialchars($year); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    
+                    <!-- Sort -->
+                    <select id="filterSort" class="form-select form-select-sm" style="width:auto;min-width:130px;max-width:160px;">
+                        <option value="newest">Newest to Oldest</option>
+                        <option value="oldest">Oldest to Newest</option>
+                    </select>
+                    
+                    <!-- Export & Add buttons -->
+                    <button type="button" id="exportWordBtn" class="btn btn-sm text-white" style="background-color:#2b5797;white-space:nowrap;">
+                        <i class="fa-solid fa-file-word me-1"></i> Word
+                    </button>
+                    <button type="button" class="btn btn-sm text-white" style="background-color:#0a1f44;white-space:nowrap;" data-bs-toggle="modal" data-bs-target="#addAuthorityModal">
+                        <i class="fa-solid fa-plus me-1"></i> Add
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <main class="p-3 p-md-4">
-
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-body py-2">
-                    <div class="d-flex flex-wrap align-items-center gap-2" style="font-size:11px;">
-                        <div class="input-group input-group-sm flex-grow-1" style="min-width:160px;max-width:260px;">
-                            <span class="input-group-text bg-white px-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size:10px;"></i></span>
-                            <input type="text" id="searchInput" class="form-control" placeholder="Search" style="font-size:11px;">
-                        </div>
-                        <select id="filterProvince" class="form-select form-select-sm" style="font-size:11px;width:auto;min-width:110px;max-width:140px;">
-                            <option value="">All Provinces</option>
-                            <?php foreach ($provinces as $province): ?>
-                            <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-1">
+                <h6 class="fw-bold mb-0">Authority Records</h6>
+                <span class="text-muted small" id="authorityTotal">Total: 0</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="authorityTable" style="font-size:11px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>No.</th>
+                                <th>CRASM#</th>
+                                <th>Name of SO</th>
+                                <th>Province</th>
+                                <th>Type</th>
+                                <th>Religious Sect</th>
+                                <th>Sex</th>
+                                <th>Church Address</th>
+                                <th>Contact No.</th>
+                                <th>Position</th>
+                                <th>Approved</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($authorityRecords as $record): ?>
+                            <tr
+                                class="authority-row"
+                                style="cursor:pointer;"
+                                data-id="<?php echo htmlspecialchars($record['id']); ?>"
+                                data-province="<?php echo htmlspecialchars($record['provinces']); ?>"
+                                data-sect="<?php echo htmlspecialchars($record['religious_sect']); ?>"
+                                data-type="<?php echo htmlspecialchars($record['type']); ?>"
+                                data-sex="<?php echo htmlspecialchars($record['sex']); ?>"
+                                data-year="<?php echo htmlspecialchars(substr($record['approved'] ?? '', 0, 4)); ?>"
+                                data-month="<?php echo htmlspecialchars(substr($record['approved'] ?? '', 5, 2)); ?>"
+                                data-date="<?php echo htmlspecialchars($record['approved'] ?? ''); ?>"
+                                data-record="<?php echo htmlspecialchars(json_encode($record), ENT_QUOTES); ?>"
+                            >
+                                <td><?php echo htmlspecialchars($record['no']); ?></td>
+                                <td><?php echo htmlspecialchars($record['crasm_no']); ?></td>
+                                <td><?php echo htmlspecialchars($record['name_of_so']); ?></td>
+                                <td><?php echo htmlspecialchars($record['provinces']); ?></td>
+                                <td><?php echo htmlspecialchars($record['type']); ?></td>
+                                <td><?php echo htmlspecialchars($record['religious_sect']); ?></td>
+                                <td><?php echo htmlspecialchars($record['sex']); ?></td>
+                                <td><?php echo htmlspecialchars($record['church_address']); ?></td>
+                                <td><?php echo htmlspecialchars($record['contact_number']); ?></td>
+                                <td><?php echo htmlspecialchars($record['position']); ?></td>
+                                <td><?php echo $record['approved'] ? htmlspecialchars(date('M d, Y', strtotime($record['approved']))) : '<span class="text-muted">—</span>'; ?></td>
+                                <td class="text-center">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item edit-authority" href="#" data-id="<?php echo htmlspecialchars($record['id']); ?>">
+                                                    <i class="fa-solid fa-pen me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger delete-authority" href="#" data-id="<?php echo htmlspecialchars($record['id']); ?>">
+                                                    <i class="fa-solid fa-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
                             <?php endforeach; ?>
-                        </select>
-                        <select id="filterSect" class="form-select form-select-sm" style="font-size:11px;width:auto;min-width:120px;max-width:160px;">
-                            <option value="">All Religious Sects</option>
-                            <?php foreach ($religiousSects as $sect): ?>
-                            <option value="<?php echo htmlspecialchars($sect); ?>"><?php echo htmlspecialchars($sect); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <select id="filterType" class="form-select form-select-sm" style="font-size:11px;width:auto;min-width:90px;max-width:110px;">
-                            <option value="">All Types</option>
-                            <option value="New">New</option>
-                            <option value="Renewal">Renewal</option>
-                        </select>
-                        <select id="filterSex" class="form-select form-select-sm" style="font-size:11px;width:auto;min-width:85px;max-width:100px;">
-                            <option value="">All Sex</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                        <select id="filterYear" class="form-select form-select-sm" style="font-size:11px;width:auto;min-width:110px;max-width:140px;">
-                            <option value="">All Approved Years</option>
-                            <?php
-                            $years = [];
-                            foreach ($authorityRecords as $r) {
-                                if (!empty($r['approved'])) {
-                                    $years[substr($r['approved'], 0, 4)] = true;
-                                }
-                            }
-                            krsort($years);
-                            foreach (array_keys($years) as $year):
-                            ?>
-                            <option value="<?php echo htmlspecialchars($year); ?>"><?php echo htmlspecialchars($year); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <a href="../actions/authority_export_word.php" class="btn btn-sm text-white" style="background-color:#2b5797;font-size:11px;">
-    <i class="fa-solid fa-file-word me-1"></i> Export to Word
-</a>
-<button type="button" class="btn btn-sm text-white" style="background-color:#0a1f44;font-size:11px;" data-bs-toggle="modal" data-bs-target="#addAuthorityModal">
-    <i class="fa-solid fa-plus me-1"></i> Add Authority
-</button>
-                    </div>
+                            <?php if (empty($authorityRecords)): ?>
+                            <tr>
+                                <td colspan="12" class="text-center text-muted py-4">No authority records found.</td>
+                            </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-1">
-                    <h6 class="fw-bold mb-0">Authority Records</h6>
-                    <span class="text-muted small" id="authorityTotal">Total: 0</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0" id="authorityTable" style="font-size:11px;">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>No.</th>
-                                    <th>CRASM#</th>
-                                    <th>Name of SO</th>
-                                    <th>Province</th>
-                                    <th>Type</th>
-                                    <th>Religious Sect</th>
-                                    <th>Sex</th>
-                                    <th>Church Address</th>
-                                    <th>Contact No.</th>
-                                    <th>Position</th>
-                                    <th>Approved</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($authorityRecords as $record): ?>
-                                <tr
-                                    class="authority-row"
-                                    style="cursor:pointer;"
-                                    data-id="<?php echo htmlspecialchars($record['id']); ?>"
-                                    data-province="<?php echo htmlspecialchars($record['provinces']); ?>"
-                                    data-sect="<?php echo htmlspecialchars($record['religious_sect']); ?>"
-                                    data-type="<?php echo htmlspecialchars($record['type']); ?>"
-                                    data-sex="<?php echo htmlspecialchars($record['sex']); ?>"
-                                    data-year="<?php echo htmlspecialchars(substr($record['approved'] ?? '', 0, 4)); ?>"
-                                    data-record="<?php echo htmlspecialchars(json_encode($record), ENT_QUOTES); ?>"
-                                >
-                                    <td><?php echo htmlspecialchars($record['no']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['crasm_no']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['name_of_so']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['provinces']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['type']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['religious_sect']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['sex']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['church_address']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['contact_number']); ?></td>
-                                    <td><?php echo htmlspecialchars($record['position']); ?></td>
-                                    <td><?php echo $record['approved'] ? htmlspecialchars(date('M d, Y', strtotime($record['approved']))) : '<span class="text-muted">—</span>'; ?></td>
-                                    <td class="text-center">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                                                <i class="fa-solid fa-ellipsis-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end">
-                                                <li>
-                                                    <a class="dropdown-item edit-authority" href="#" data-id="<?php echo htmlspecialchars($record['id']); ?>">
-                                                        <i class="fa-solid fa-pen me-2"></i>Edit
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger delete-authority" href="#" data-id="<?php echo htmlspecialchars($record['id']); ?>">
-                                                        <i class="fa-solid fa-trash me-2"></i>Delete
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                                <?php if (empty($authorityRecords)): ?>
-                                <tr>
-                                    <td colspan="12" class="text-center text-muted py-4">No authority records found.</td>
-                                </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-                    <span class="text-muted small" id="paginationInfo">Showing records</span>
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
-                    </nav>
-                </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <span class="text-muted small" id="paginationInfo">Showing records</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+                </nav>
             </div>
+        </div>
 
-        </main>
-
-    </div>
+    </main>
 
 </div>
 
+<!-- Modals (same as before) -->
 <div class="modal fade" id="addAuthorityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
@@ -236,15 +296,11 @@ data-bs-target="#sidebarOffcanvas"
 
                     <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size:.6rem;letter-spacing:.05em;">Basic Information</h6>
                     <div class="row g-2 mb-3">
-                        <div class="col-md-2">
-                            <label for="no" class="form-label mb-1" style="font-size:11px;">No.</label>
-                            <input type="number" class="form-control form-control-sm" id="no" name="no" style="font-size:11px;" required>
-                        </div>
                         <div class="col-md-4">
                             <label for="crasm_no" class="form-label mb-1" style="font-size:11px;">CRASM#</label>
                             <input type="text" class="form-control form-control-sm" id="crasm_no" name="crasm_no" style="font-size:11px;" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-8">
                             <label for="name_of_so" class="form-label mb-1" style="font-size:11px;">Name of SO</label>
                             <input type="text" class="form-control form-control-sm" id="name_of_so" name="name_of_so" style="font-size:11px;" required>
                         </div>
@@ -279,7 +335,7 @@ data-bs-target="#sidebarOffcanvas"
                                 <option value="Female">Female</option>
                             </select>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-4">
                             <label for="religious_sect" class="form-label mb-1" style="font-size:11px;">Religious Sect</label>
                             <input type="text" class="form-control form-control-sm" id="religious_sect" name="religious_sect" list="religiousSectList" autocomplete="off" style="font-size:11px;" required>
                             <datalist id="religiousSectList">
@@ -413,7 +469,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterSect = document.getElementById('filterSect');
     const filterType = document.getElementById('filterType');
     const filterSex = document.getElementById('filterSex');
+    const filterMonth = document.getElementById('filterMonth');
     const filterYear = document.getElementById('filterYear');
+    const filterSort = document.getElementById('filterSort');
     const tableBody = document.querySelector('#authorityTable tbody');
     const allRows = Array.from(tableBody.querySelectorAll('tr.authority-row'));
     const paginationControls = document.getElementById('paginationControls');
@@ -427,9 +485,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const sect = filterSect.value;
         const type = filterType.value;
         const sex = filterSex.value;
+        const month = filterMonth.value;
         const year = filterYear.value;
+        const sort = filterSort.value;
 
-        return allRows.filter(function (row) {
+        let filtered = allRows.filter(function (row) {
             const cells = row.querySelectorAll('td');
             const crasmNo = cells[1] ? cells[1].textContent.toLowerCase() : '';
             const nameOfSo = cells[2] ? cells[2].textContent.toLowerCase() : '';
@@ -438,9 +498,22 @@ document.addEventListener('DOMContentLoaded', function () {
             const matchesSect = !sect || row.dataset.sect === sect;
             const matchesType = !type || row.dataset.type === type;
             const matchesSex = !sex || row.dataset.sex === sex;
+            const matchesMonth = !month || row.dataset.month === month;
             const matchesYear = !year || row.dataset.year === year;
-            return matchesSearch && matchesProvince && matchesSect && matchesType && matchesSex && matchesYear;
+            return matchesSearch && matchesProvince && matchesSect && matchesType && matchesSex && matchesMonth && matchesYear;
         });
+
+        filtered.sort(function (a, b) {
+            const dateA = a.dataset.date || '';
+            const dateB = b.dataset.date || '';
+            if (sort === 'newest') {
+                return dateB.localeCompare(dateA);
+            } else {
+                return dateA.localeCompare(dateB);
+            }
+        });
+
+        return filtered;
     }
 
     function renderTable() {
@@ -512,7 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
         paginationControls.appendChild(nextItem);
     }
 
-    [searchInput, filterProvince, filterSect, filterType, filterSex, filterYear].forEach(function (control) {
+    [searchInput, filterProvince, filterSect, filterType, filterSex, filterMonth, filterYear, filterSort].forEach(function (control) {
         control.addEventListener('input', function () {
             currentPage = 1;
             renderTable();
@@ -524,6 +597,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     renderTable();
+
+    // Export to Word — carries over whichever filters are currently active
+    // (province, sect, type, sex, month, year) so the downloaded file
+    // matches what's on screen. The filename itself is based on Month/Year.
+    const exportWordBtn = document.getElementById('exportWordBtn');
+    exportWordBtn.addEventListener('click', function () {
+        const params = new URLSearchParams();
+        if (filterProvince.value) params.set('province', filterProvince.value);
+        if (filterSect.value) params.set('sect', filterSect.value);
+        if (filterType.value) params.set('type', filterType.value);
+        if (filterSex.value) params.set('sex', filterSex.value);
+        if (filterMonth.value) params.set('month', filterMonth.value);
+        if (filterYear.value) params.set('year', filterYear.value);
+
+        const query = params.toString();
+        window.location.href = '../actions/authority_export_word.php' + (query ? '?' + query : '');
+    });
 
     let deleteTargetId = null;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteAuthorityModal'));
@@ -580,7 +670,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (record) {
                 Object.keys(record).forEach(function (key) {
-                    if (key === 'municipality') return;
+                    if (key === 'municipality' || key === 'no') return;
                     const field = authorityForm.elements[key];
                     if (field) {
                         field.value = record[key] || '';

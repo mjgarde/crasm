@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="w-100" style="background-color:#002d62;">
     <div class="container py-2">
         <div class="d-flex align-items-center flex-wrap">
-            <img src="assets/img/logo.webp"
+            <img src="assets/img/logo.png"
                  alt="Agency Seal"
                  class="me-2"
                  style="width:36px;height:36px;object-fit:contain;">
@@ -180,30 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
 
                             </div>
-
+<hr>
                             <div class="d-flex justify-content-between align-items-center mb-4">
-
-                                <div class="form-check">
-                                    <input
-                                        class="form-check-input"
-                                        type="checkbox"
-                                        id="remember"
-                                    >
-
-                                    <label class="form-check-label small" for="remember">
-                                        Remember me
-                                    </label>
-                                </div>
-
-                                <a
-                                    href="forgot-password.html"
-                                    class="small text-decoration-none"
-                                    style="color:#002d62;"
-                                >
-                                    Forgot password?
-                                </a>
-
-                            </div>
 
                             <button
                                 type="submit"
