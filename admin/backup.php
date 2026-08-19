@@ -7,6 +7,67 @@ if (!isset($_SESSION['admin_id'])) {
 require_once '../config/database.php';
 $database = new Database();
 $db = $database->connect();
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $_SESSION['backup_unlocked'] = false;
+}
+
+if (!empty($_POST['unlock_backup'])) {
+    $checkStmt = $db->prepare('SELECT password FROM administrator WHERE id = ? LIMIT 1');
+    $checkStmt->execute([$_SESSION['admin_id']]);
+    $adminRow = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($adminRow && password_verify((string) $_POST['backup_password'], $adminRow['password'])) {
+        $_SESSION['backup_unlocked'] = true;
+    } else {
+        $_SESSION['backup_unlocked'] = false;
+        $lockError = 'Incorrect password. Please try again.';
+    }
+}
+
+if (empty($_SESSION['backup_unlocked'])) {
+    ?>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CRASM | Backup - Verify Access</title>
+        <link href="../assets/vendor/bootstrap-5.3.8/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../assets/vendor/fontawesome-free-7.3.1/css/all.min.css">
+    </head>
+    <body class="bg-light">
+    <?php require __DIR__ . '/../includes/navbar.php'; ?>
+    <div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 80px);">
+        <div class="card border-0 shadow-sm" style="max-width: 380px; width: 100%;">
+            <div class="card-body p-4">
+                <div class="text-center mb-3">
+                </div>
+                <?php if (!empty($lockError)): ?>
+                    <div class="alert alert-danger py-2 small mb-3">
+                        <i class="fa-solid fa-circle-exclamation me-1"></i><?php echo htmlspecialchars($lockError); ?>
+                    </div>
+                <?php endif; ?>
+                <form method="POST" action="backup.php">
+                    <input type="hidden" name="unlock_backup" value="1">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-muted">Enter your Password to Unlock</label>
+                        <input type="password" name="backup_password" class="form-control" autofocus required>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100">
+                        <i class="fa-solid fa-unlock me-2"></i>Unlock
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="../assets/vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js"></script>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
 $backupDir = __DIR__ . '/../backups/';
 if (!is_dir($backupDir)) {
     mkdir($backupDir, 0755, true);

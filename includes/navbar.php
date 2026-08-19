@@ -1,6 +1,6 @@
 <?php
-$adminUsername = $_SESSION['admin_username'] ?? 'Administrator';
-$adminInitial  = strtoupper(substr($adminUsername, 0, 1));
+$adminName = $_SESSION['admin_name'] ?? 'Administrator';
+$adminInitial  = strtoupper(substr($adminName, 0, 1));
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,7 +111,7 @@ $adminInitial  = strtoupper(substr($adminUsername, 0, 1));
                             <div class="text-truncate">
                                 <div class="text-muted" style="font-size:10px;">Signed in as</div>
                                 <div class="fw-semibold text-truncate" style="font-size:13px;color:#111;">
-                                    <?= htmlspecialchars($adminUsername) ?>
+                                    <?= htmlspecialchars($adminName) ?>
                                 </div>
                             </div>
                         </li>
