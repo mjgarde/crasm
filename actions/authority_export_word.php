@@ -1,18 +1,4 @@
 <?php
-/**
- * authority_export_word.php  (REAL .DOCX + LOGO — NO LIBRARY)
- * ---------------------------------------------------------
- * Real OOXML .docx built with PHP's built-in ZipArchive.
- * No Composer, no vendor folder, no PhpWord. Mirrors the
- * layout produced by authority_export_excel.php but as a
- * Word document (DSCIS Form 2 (RO) table with merged header
- * cells, PSA logo, and signature block).
- *
- * Requires: PHP "zip" extension (almost always on by default)
- *
- * Place this file in your /actions/ folder.
- * ---------------------------------------------------------
- */
 
 session_start();
 
@@ -23,12 +9,8 @@ if (!isset($_SESSION['admin_id'])) {
 
 require_once '../config/database.php';
 
-/* =========================================================
-   1. CONFIG
-   ========================================================= */
 $REGION_LABEL      = 'REGION: XII';
 $SUBREGION_LABEL   = 'SOCCSKSARGEN Region';
-$REPORT_DATE       = date('F Y');
 $SHEET_LABEL       = 'Sheet 1 of 1 sheets';
 
 $PREPARED_BY_NAME  = 'MICHAEL A. MAMA';
@@ -38,14 +20,10 @@ $REVIEWED_BY_TITLE = 'OIC-Chief, CRASD';
 $APPROVED_BY_NAME  = 'ATTY. MAQTAHAR L. MANULON, CESO V';
 $APPROVED_BY_TITLE = 'Regional Director';
 
-/* =========================================================
-   2. LOAD LOGO (PNG DIRECTLY - NO CONVERSION NEEDED)
-   ========================================================= */
 $logoPng   = null;
 $logoWidth = 0;
 $logoHeight = 0;
 
-// Try multiple possible paths for logo
 $possiblePaths = [
     __DIR__ . '/../assets/img/logo.png',
     __DIR__ . '/../assets/img/logo.jpg',
@@ -66,7 +44,6 @@ foreach ($possiblePaths as $path) {
 
 if ($logoPath) {
     $logoPng = file_get_contents($logoPath);
-    // Get image dimensions if GD is available
     if (function_exists('getimagesize')) {
         $info = @getimagesize($logoPath);
         if ($info) {
@@ -78,9 +55,6 @@ if ($logoPath) {
 
 $hasLogo = $logoPng !== null;
 
-/* =========================================================
-   3. FETCH DATA
-   ========================================================= */
 $database = new Database();
 $db = $database->connect();
 
@@ -103,11 +77,11 @@ if (!empty($_GET['sex'])) {
     $params[':sex'] = $_GET['sex'];
 }
 if (!empty($_GET['month'])) {
-    $where[] = "MONTH(approved) = :month"; // MySQL
+    $where[] = "MONTH(approved) = :month";
     $params[':month'] = $_GET['month'];
 }
 if (!empty($_GET['year'])) {
-    $where[] = "YEAR(approved) = :year"; // MySQL
+    $where[] = "YEAR(approved) = :year";
     $params[':year'] = $_GET['year'];
 }
 $sql = "SELECT * FROM authority_records";
@@ -118,6 +92,32 @@ $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$monthNames = [
+    '01' => 'JANUARY', '02' => 'FEBRUARY', '03' => 'MARCH',
+    '04' => 'APRIL',   '05' => 'MAY',      '06' => 'JUNE',
+    '07' => 'JULY',    '08' => 'AUGUST',   '09' => 'SEPTEMBER',
+    '10' => 'OCTOBER', '11' => 'NOVEMBER', '12' => 'DECEMBER',
+];
+
+$monthParam = $_GET['month'] ?? '';
+$yearParam  = $_GET['year'] ?? '';
+
+$hasMonth = ($monthParam !== '' && isset($monthNames[$monthParam]));
+$hasYear  = ($yearParam !== '');
+
+if ($hasMonth && $hasYear) {
+    $REPORT_DATE = $monthNames[$monthParam] . ' ' . $yearParam;
+} elseif ($hasYear) {
+    $REPORT_DATE = $yearParam;
+} elseif ($hasMonth) {
+    $REPORT_DATE = $monthNames[$monthParam];
+} else {
+    $REPORT_DATE = strtoupper(date('F Y'));
+}
+
+$monthLabel = $hasMonth ? $monthNames[$monthParam] : 'ALL MONTHS';
+$yearLabel  = $hasYear ? $yearParam : 'ALL YEARS';
+
 function fmtDate($value) {
     return !empty($value) ? date('n/j/Y', strtotime($value)) : '';
 }
@@ -125,24 +125,17 @@ function xmlEscape($str) {
     return htmlspecialchars((string)$str, ENT_QUOTES | ENT_XML1, 'UTF-8');
 }
 
-/* =========================================================
-   4. DOCX BUILDING HELPERS
-   ========================================================= */
-
-// EMU conversion: 1 inch = 914400 EMU; 1 px (96dpi) = 9525 EMU
 function pxToEmu($px) { return (int) round($px * 9525); }
 
-// Twips: 1 inch = 1440 twips
-// Column widths (in twips) — total ~ 10500 (7.29in) to fit US Letter with 1" margins
 $colWidthsTw = [
-    'no'        => 600,   // NO.
-    'name'      => 3000,  // NAME OF APPLICANT
-    'new'       => 870,   // NEW
-    'renewal'   => 1030,  // RENEWAL (+10 twips ≈ 1px more)
-    'received'  => 1300,  // DATE RECEIVED
-    'approved'  => 1300,  // APPROVED
-    'disapproved' => 1400, // DISAPPROVED
-    'transmitted' => 1300, // DATE TRANSMITTED BACK TO P.O.
+    'no'        => 600,
+    'name'      => 3000,
+    'new'       => 870,
+    'renewal'   => 1030,
+    'received'  => 1300,
+    'approved'  => 1300,
+    'disapproved' => 1400,
+    'transmitted' => 1300,
 ];
 $tableWidthTw = array_sum($colWidthsTw);
 
@@ -155,12 +148,6 @@ function cellBorders() {
         . '</w:tcBorders>';
 }
 
-/**
- * Build one table cell.
- * $opts: width(tw), gridSpan(int), vMerge('restart'|'continue'|null),
- *        bold(bool), align('center'|'left'|'right'), size(halfpoints),
- *        border(bool), shading(hex|null)
- */
 function tcell($text, $opts = []) {
     $width    = $opts['width']    ?? null;
     $gridSpan = $opts['gridSpan'] ?? null;
@@ -169,7 +156,7 @@ function tcell($text, $opts = []) {
     $italic   = $opts['italic']   ?? false;
     $underline= $opts['underline']?? false;
     $align    = $opts['align']    ?? 'left';
-    $size     = $opts['size']     ?? 18; // halfpoints (18 = 9pt)
+    $size     = $opts['size']     ?? 18;
     $border   = $opts['border']   ?? true;
     $vAlign   = $opts['vAlign']   ?? 'center';
 
@@ -192,7 +179,6 @@ function tcell($text, $opts = []) {
 
     $jc = '<w:jc w:val="' . $align . '"/>';
 
-    // vMerge continue rows must still have an (empty) paragraph
     $textXml = ($vMerge === 'continue')
         ? '<w:p><w:pPr><w:jc w:val="' . $align . '"/></w:pPr></w:p>'
         : '<w:p><w:pPr>' . $jc . '</w:pPr><w:r>' . $rPr . '<w:t xml:space="preserve">' . xmlEscape($text) . '</w:t></w:r></w:p>';
@@ -208,30 +194,20 @@ function trow($cellsXml, $height = null) {
     return '<w:tr>' . $trPr . implode('', $cellsXml) . '</w:tr>';
 }
 
-/* =========================================================
-   5. BUILD DOCUMENT BODY
-   ========================================================= */
 $bodyXml = '';
 
-// --- Form code line ---
 $bodyXml .= '<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r>'
     . '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="16"/></w:rPr>'
     . '<w:t>DSCIS Form 2 (RO)</w:t></w:r></w:p>';
 
-// --- Title block: text centered, logo positioned ---
 $logoDrawing = '';
 if ($hasLogo) {
     $emuW = pxToEmu(70);
     $emuH = $logoHeight > 0 ? (int) round($emuW * ($logoHeight / $logoWidth)) : pxToEmu(70);
-    
-    // Edit these two values to move the logo
-    $xPos = 6286500;   // ← 20px RIGHT
-    
-    // Y POSITION - Using relativeFrom="margin"
-    // 0 = at top margin, negative = above margin (up), positive = below margin (down)
-    // 1px = 10 EMU
-    $yOffset = -200;   // ← 20px ABOVE top margin (adjust this)
-    
+
+    $xPos = 6286500;
+    $yOffset = -95250;
+
     $logoDrawing = '<w:r><w:rPr><w:noProof/></w:rPr><w:drawing>'
         . '<wp:anchor behindDoc="0" distT="0" distB="0" distL="0" distR="0" simplePos="0" locked="0" layoutInCell="1" allowOverlap="1" relativeHeight="1">'
         . '<wp:simplePos x="0" y="0"/>'
@@ -262,18 +238,16 @@ $bodyXml .= '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r>'
     . '<w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="20"/></w:rPr>'
     . '<w:t>' . xmlEscape($SUBREGION_LABEL) . '</w:t></w:r></w:p>';
 
-// --- Region / Date line (tab-separated) ---
 $bodyXml .= '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="10500"/></w:tabs></w:pPr>'
     . '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="18"/></w:rPr>'
     . '<w:t xml:space="preserve">' . xmlEscape($REGION_LABEL) . '</w:t></w:r>'
     . '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="18"/></w:rPr><w:tab/>'
-    . '<w:t>DATE: ' . xmlEscape(strtoupper($REPORT_DATE)) . '</w:t></w:r></w:p>';
+    . '<w:t>DATE: ' . xmlEscape($REPORT_DATE) . '</w:t></w:r></w:p>';
 
 $bodyXml .= '<w:p><w:pPr><w:tabs><w:tab w:val="right" w:pos="10500"/></w:tabs></w:pPr>'
     . '<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="18"/></w:rPr><w:tab/>'
     . '<w:t>' . xmlEscape($SHEET_LABEL) . '</w:t></w:r></w:p>';
 
-// --- Table grid ---
 $gridXml = '<w:tblGrid>';
 foreach ($colWidthsTw as $w) $gridXml .= '<w:gridCol w:w="' . $w . '"/>';
 $gridXml .= '</w:tblGrid>';
@@ -291,7 +265,6 @@ $tblPr = '<w:tblPr>'
     . '<w:tblLayout w:type="fixed"/>'
     . '</w:tblPr>';
 
-// --- Header row 1 ---
 $hdr1 = [];
 $hdr1[] = tcell('NO.', ['width' => $colWidthsTw['no'], 'vMerge' => 'restart', 'bold' => true, 'align' => 'center', 'size' => 16]);
 $hdr1[] = tcell('NAME OF APPLICANT', ['width' => $colWidthsTw['name'], 'vMerge' => 'restart', 'bold' => true, 'align' => 'center', 'size' => 16]);
@@ -301,7 +274,6 @@ $hdr1[] = tcell('ACTION TAKEN (DATE)', ['width' => $colWidthsTw['approved'] + $c
 $hdr1[] = tcell('DATE TRANSMITTED BACK TO P.O.', ['width' => $colWidthsTw['transmitted'], 'vMerge' => 'restart', 'bold' => true, 'align' => 'center', 'size' => 16]);
 $tableRows = trow($hdr1, 500);
 
-// --- Header row 2 ---
 $hdr2 = [];
 $hdr2[] = tcell('', ['width' => $colWidthsTw['no'], 'vMerge' => 'continue']);
 $hdr2[] = tcell('', ['width' => $colWidthsTw['name'], 'vMerge' => 'continue']);
@@ -313,7 +285,6 @@ $hdr2[] = tcell('DISAPPROVED', ['width' => $colWidthsTw['disapproved'], 'bold' =
 $hdr2[] = tcell('', ['width' => $colWidthsTw['transmitted'], 'vMerge' => 'continue']);
 $tableRows .= trow($hdr2);
 
-// --- Data rows ---
 $num = 1;
 foreach ($records as $rec) {
     $isNew     = strcasecmp($rec['type'] ?? '', 'New') === 0;
@@ -336,11 +307,8 @@ $tableXml = '<w:tbl>' . $tblPr . $gridXml . $tableRows . '</w:tbl>';
 
 $bodyXml .= $tableXml;
 
-// --- Spacer paragraphs ---
 $bodyXml .= '<w:p/><w:p/>';
 
-// --- Signature block (3-column borderless table) ---
-// Give "Approved by" a bit more width so the long name fits on one line.
 $sigColW      = (int) round($tableWidthTw / 3) - 150;
 $sigColWLast  = $tableWidthTw - ($sigColW * 2);
 $sigTblPr = '<w:tblPr><w:tblW w:w="' . $tableWidthTw . '" w:type="dxa"/>'
@@ -377,15 +345,11 @@ $sigRows .= trow([
 
 $bodyXml .= '<w:tbl>' . $sigTblPr . $sigGrid . $sigRows . '</w:tbl>';
 
-// --- Section properties (US Letter, 0.5in margins) ---
 $bodyXml .= '<w:sectPr>'
     . '<w:pgSz w:w="12240" w:h="15840"/>'
     . '<w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720" w:header="720" w:footer="720" w:gutter="0"/>'
     . '</w:sectPr>';
 
-/* =========================================================
-   6. OOXML PARTS
-   ========================================================= */
 $contentTypesExtra = $hasLogo
     ? '<Default Extension="png" ContentType="image/png"/>'
     : '';
@@ -444,29 +408,6 @@ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 </w:body>
 </w:document>
 XML;
-
-/* =========================================================
-   7. BUILD ZIP (DOCX) AND STREAM
-   ========================================================= */
-// Generate filename based on the Month/Year filters currently applied.
-// Examples: CRASM REPORTS (ALL MONTHS 2023).docx
-//           CRASM REPORTS (FEBRUARY 2023).docx
-//           CRASM REPORTS (ALL MONTHS ALL YEARS).docx
-$monthNames = [
-    '01' => 'JANUARY', '02' => 'FEBRUARY', '03' => 'MARCH',
-    '04' => 'APRIL',   '05' => 'MAY',      '06' => 'JUNE',
-    '07' => 'JULY',    '08' => 'AUGUST',   '09' => 'SEPTEMBER',
-    '10' => 'OCTOBER', '11' => 'NOVEMBER', '12' => 'DECEMBER',
-];
-
-$monthParam = $_GET['month'] ?? '';
-$yearParam  = $_GET['year'] ?? '';
-
-$monthLabel = ($monthParam !== '' && isset($monthNames[$monthParam]))
-    ? $monthNames[$monthParam]
-    : 'ALL MONTHS';
-
-$yearLabel = ($yearParam !== '') ? $yearParam : 'ALL YEARS';
 
 $filename = 'CRASM REPORTS (' . $monthLabel . ' ' . $yearLabel . ').docx';
 

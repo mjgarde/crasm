@@ -74,12 +74,10 @@ $recentRecords = array_slice($allRecords, 0, 8);
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>.kpi-card,.kpi-icon{align-items:center;display:flex}.kpi-card,.panel-card{background:var(--surface);box-shadow:0 1px 2px rgba(16,24,40,.04)}.kpi-label,.recent-table th{text-transform:uppercase;letter-spacing:.03em}.recent-table td,.recent-table th{padding:8px 10px;border-bottom:1px solid var(--line)}.panel-card-header,.recent-table td,.recent-table th{border-bottom:1px solid var(--line)}:root{--psa-blue:#003883;--psa-blue-dark:#002a63;--psa-red:#a3202f;--psa-gold:#d4a017;--ink:#1c2430;--ink-soft:#5b6472;--line:#e3e7ee;--surface:#ffffff;--canvas:#f4f6f9}body{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background-color:var(--canvas)}.dash-shell{width:100%;max-width:100%}.kpi-card{border:1px solid var(--line);border-radius:10px;padding:16px 18px;gap:14px;height:100%}.kpi-icon{width:42px;height:42px;border-radius:10px;justify-content:center;font-size:16px;flex-shrink:0;color:#fff}.kpi-label{font-size:11px;color:var(--ink-soft);font-weight:600;margin-bottom:2px}.kpi-value,.panel-card-header h6{font-weight:700;color:var(--ink)}.kpi-value{font-size:20px;line-height:1.1}.kpi-sub{font-size:10.5px;color:var(--ink-soft);margin-top:2px}.panel-card{border:1px solid var(--line);border-radius:10px;margin-bottom:18px;overflow:hidden}.panel-card-header{padding:12px 16px;display:flex;align-items:center;gap:10px}.panel-card-header .bar{width:4px;height:16px;border-radius:2px;background:var(--psa-blue)}.panel-card-header h6{font-size:13.5px;margin:0}.panel-card-body{padding:16px}.recent-table{width:100%;font-size:11.5px;border-collapse:collapse}.recent-table th{background:#f8f9fb;color:var(--ink-soft);font-weight:600;font-size:10px;text-align:left}.recent-table td{vertical-align:middle}.recent-table tbody tr:hover td{background-color:#f5f8fc}
 
-/* 🔽 WALANG KULAY — plain text lang, gaya ng iba */
 .badge-type-new,
 .badge-type-renewal {
     font-weight: 600;
     font-size: 10px;
-    /* walang color, walang background, walang padding */
 }
 </style>
 </head>
@@ -94,7 +92,7 @@ $recentRecords = array_slice($allRecords, 0, 8);
 
         <div class="mb-4">
             <h4 class="fw-bold mb-1">Dashboard</h4>
-            <p class="text-muted small mb-0">Overview of the CRASM records management system.</p>
+            <hr>
         </div>
 
         <div class="row g-3 mb-4">

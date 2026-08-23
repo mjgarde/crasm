@@ -118,13 +118,11 @@ $months = [
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-body py-2">
                 <div class="filter-row d-flex flex-wrap align-items-center gap-2">
-                    <!-- Search -->
                     <div class="input-group input-group-sm flex-grow-1" style="min-width:120px;max-width:200px;">
                         <span class="input-group-text bg-white px-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size:10px;"></i></span>
                         <input type="text" id="searchInput" class="form-control" placeholder="Search...">
                     </div>
                     
-                    <!-- Province -->
                     <select id="filterProvince" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:130px;">
                         <option value="">All Provinces</option>
                         <?php foreach ($provinces as $province): ?>
@@ -132,7 +130,6 @@ $months = [
                         <?php endforeach; ?>
                     </select>
                     
-                    <!-- Religious Sect -->
                     <select id="filterSect" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:140px;">
                         <option value="">All Sects</option>
                         <?php foreach ($religiousSects as $sect): ?>
@@ -140,21 +137,18 @@ $months = [
                         <?php endforeach; ?>
                     </select>
                     
-                    <!-- Type -->
                     <select id="filterType" class="form-select form-select-sm" style="width:auto;min-width:80px;max-width:100px;">
                         <option value="">All Types</option>
                         <option value="New">New</option>
                         <option value="Renewal">Renewal</option>
                     </select>
                     
-                    <!-- Sex -->
                     <select id="filterSex" class="form-select form-select-sm" style="width:auto;min-width:75px;max-width:90px;">
                         <option value="">All Sex</option>
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                     </select>
                     
-                    <!-- Month -->
                     <select id="filterMonth" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:120px;">
                         <option value="">All Months</option>
                         <?php foreach ($months as $num => $name): ?>
@@ -162,7 +156,6 @@ $months = [
                         <?php endforeach; ?>
                     </select>
                     
-                    <!-- Year -->
                     <select id="filterYear" class="form-select form-select-sm" style="width:auto;min-width:90px;max-width:110px;">
                         <option value="">All Years</option>
                         <?php
@@ -179,13 +172,11 @@ $months = [
                         <?php endforeach; ?>
                     </select>
                     
-                    <!-- Sort -->
                     <select id="filterSort" class="form-select form-select-sm" style="width:auto;min-width:130px;max-width:160px;">
                         <option value="newest">Newest to Oldest</option>
                         <option value="oldest">Oldest to Newest</option>
                     </select>
                     
-                    <!-- Export & Add buttons -->
                     <button type="button" id="exportWordBtn" class="btn btn-sm text-white" style="background-color:#2b5797;white-space:nowrap;">
                         <i class="fa-solid fa-file-word me-1"></i> Word
                     </button>
@@ -289,7 +280,6 @@ $months = [
 
 </div>
 
-<!-- Modals (same as before) -->
 <div class="modal fade" id="addAuthorityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content">
@@ -606,9 +596,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     renderTable();
 
-    // Export to Word — carries over whichever filters are currently active
-    // (province, sect, type, sex, month, year) so the downloaded file
-    // matches what's on screen. The filename itself is based on Month/Year.
     const exportWordBtn = document.getElementById('exportWordBtn');
     exportWordBtn.addEventListener('click', function () {
         const params = new URLSearchParams();

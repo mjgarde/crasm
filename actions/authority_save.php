@@ -45,7 +45,6 @@ foreach ($fields as $field) {
     $data[$field] = $value === '' ? null : $value;
 }
 
-// Auto-assign "no" based on order added (next number after the highest existing one).
 $noStmt = $db->query("SELECT MAX(no) AS max_no FROM authority_records");
 $maxNo = $noStmt->fetch(PDO::FETCH_ASSOC)['max_no'] ?? 0;
 $data['no'] = (int) $maxNo + 1;

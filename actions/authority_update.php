@@ -24,8 +24,6 @@ if ($id === '') {
 $database = new Database();
 $db = $database->connect();
 
-// Note: 'no' is intentionally excluded here — it is auto-assigned only
-// once, when the record is first added, and should never change on edit.
 $fields = [
     'crasm_no',
     'name_of_so',
