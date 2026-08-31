@@ -21,7 +21,7 @@ $adminInitial  = strtoupper(substr($adminName, 0, 1));
             >
             <div>
                 <div class="fw-bold text-white" style="font-size:12px;white-space:nowrap;line-height:1.1;">
-                    PHILIPPINE STATISTICS AUTHORITY 
+                    PHILIPPINE STATISTICS AUTHORITY XII
                 </div>
                 <div style="font-size:9px;white-space:nowrap;color:rgba(255,255,255,.7);">
                     Certificate of Registration of Authority to Solemnize Marriage
