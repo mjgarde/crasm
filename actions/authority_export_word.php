@@ -1,3 +1,4 @@
+
 <?php
 
 session_start();
@@ -58,6 +59,20 @@ $hasLogo = $logoPng !== null;
 $database = new Database();
 $db = $database->connect();
 
+// --- Read + validate incoming date range filters ---
+$dateFromParam = $_GET['date_from'] ?? '';
+$dateToParam   = $_GET['date_to'] ?? '';
+
+function isValidDateStr($str) {
+    if ($str === '' || $str === null) return false;
+    $d = DateTime::createFromFormat('Y-m-d', $str);
+    return $d && $d->format('Y-m-d') === $str;
+}
+
+$hasDateFrom = isValidDateStr($dateFromParam);
+$hasDateTo   = isValidDateStr($dateToParam);
+$isDateRangeMode = $hasDateFrom || $hasDateTo;
+
 $where  = [];
 $params = [];
 if (!empty($_GET['province'])) {
@@ -76,14 +91,28 @@ if (!empty($_GET['sex'])) {
     $where[] = 'sex = :sex';
     $params[':sex'] = $_GET['sex'];
 }
-if (!empty($_GET['month'])) {
-    $where[] = "MONTH(approved) = :month";
-    $params[':month'] = $_GET['month'];
+
+if ($isDateRangeMode) {
+    // Date range takes priority over month/year
+    if ($hasDateFrom) {
+        $where[] = 'approved >= :date_from';
+        $params[':date_from'] = $dateFromParam;
+    }
+    if ($hasDateTo) {
+        $where[] = 'approved <= :date_to';
+        $params[':date_to'] = $dateToParam;
+    }
+} else {
+    if (!empty($_GET['month'])) {
+        $where[] = "MONTH(approved) = :month";
+        $params[':month'] = $_GET['month'];
+    }
+    if (!empty($_GET['year'])) {
+        $where[] = "YEAR(approved) = :year";
+        $params[':year'] = $_GET['year'];
+    }
 }
-if (!empty($_GET['year'])) {
-    $where[] = "YEAR(approved) = :year";
-    $params[':year'] = $_GET['year'];
-}
+
 $sql = "SELECT * FROM authority_records";
 if ($where) $sql .= " WHERE " . implode(' AND ', $where);
 $sql .= " ORDER BY no ASC";
@@ -92,6 +121,7 @@ $stmt = $db->prepare($sql);
 $stmt->execute($params);
 $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// --- Build the DATE: label and filename label ---
 $monthNames = [
     '01' => 'JANUARY', '02' => 'FEBRUARY', '03' => 'MARCH',
     '04' => 'APRIL',   '05' => 'MAY',      '06' => 'JUNE',
@@ -99,24 +129,59 @@ $monthNames = [
     '10' => 'OCTOBER', '11' => 'NOVEMBER', '12' => 'DECEMBER',
 ];
 
-$monthParam = $_GET['month'] ?? '';
-$yearParam  = $_GET['year'] ?? '';
+if ($isDateRangeMode) {
 
-$hasMonth = ($monthParam !== '' && isset($monthNames[$monthParam]));
-$hasYear  = ($yearParam !== '');
+    // Filename-friendly (Title Case) versions, e.g. "January 6, 2026"
+    $fromDisplay = $hasDateFrom ? date('F j, Y', strtotime($dateFromParam)) : null;
+    $toDisplay   = $hasDateTo ? date('F j, Y', strtotime($dateToParam)) : null;
 
-if ($hasMonth && $hasYear) {
-    $REPORT_DATE = $monthNames[$monthParam] . ' ' . $yearParam;
-} elseif ($hasYear) {
-    $REPORT_DATE = $yearParam;
-} elseif ($hasMonth) {
-    $REPORT_DATE = $monthNames[$monthParam];
+    // Report DATE: label version (ALL CAPS, to match the rest of the form), e.g. "JANUARY 6, 2026"
+    $fromUpper = $fromDisplay ? strtoupper($fromDisplay) : null;
+    $toUpper   = $toDisplay ? strtoupper($toDisplay) : null;
+
+    if ($hasDateFrom && $hasDateTo && $dateFromParam === $dateToParam) {
+        // Single specific date (from == to)
+        $REPORT_DATE = $fromUpper;
+        $monthLabel  = $fromDisplay;
+        $yearLabel   = '';
+    } elseif ($hasDateFrom && $hasDateTo) {
+        // Full range
+        $REPORT_DATE = $fromUpper . ' - ' . $toUpper;
+        $monthLabel  = $fromDisplay . ' to ' . $toDisplay;
+        $yearLabel   = '';
+    } elseif ($hasDateFrom) {
+        // Open-ended range: from a date onward
+        $REPORT_DATE = 'FROM ' . $fromUpper;
+        $monthLabel  = 'From ' . $fromDisplay;
+        $yearLabel   = '';
+    } else {
+        // Open-ended range: up to a date
+        $REPORT_DATE = 'UP TO ' . $toUpper;
+        $monthLabel  = 'Up to ' . $toDisplay;
+        $yearLabel   = '';
+    }
+
 } else {
-    $REPORT_DATE = strtoupper(date('F Y'));
-}
 
-$monthLabel = $hasMonth ? $monthNames[$monthParam] : 'ALL MONTHS';
-$yearLabel  = $hasYear ? $yearParam : 'ALL YEARS';
+    $monthParam = $_GET['month'] ?? '';
+    $yearParam  = $_GET['year'] ?? '';
+
+    $hasMonth = ($monthParam !== '' && isset($monthNames[$monthParam]));
+    $hasYear  = ($yearParam !== '');
+
+    if ($hasMonth && $hasYear) {
+        $REPORT_DATE = $monthNames[$monthParam] . ' ' . $yearParam;
+    } elseif ($hasYear) {
+        $REPORT_DATE = $yearParam;
+    } elseif ($hasMonth) {
+        $REPORT_DATE = $monthNames[$monthParam];
+    } else {
+        $REPORT_DATE = strtoupper(date('F Y'));
+    }
+
+    $monthLabel = $hasMonth ? $monthNames[$monthParam] : 'ALL MONTHS';
+    $yearLabel  = $hasYear ? $yearParam : 'ALL YEARS';
+}
 
 function fmtDate($value) {
     return !empty($value) ? date('n/j/Y', strtotime($value)) : '';
@@ -409,7 +474,11 @@ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 </w:document>
 XML;
 
-$filename = 'CRASM REPORTS (' . $monthLabel . ' ' . $yearLabel . ').docx';
+if ($yearLabel !== '') {
+    $filename = 'CRASM REPORTS (' . $monthLabel . ' ' . $yearLabel . ').docx';
+} else {
+    $filename = 'CRASM REPORTS (' . $monthLabel . ').docx';
+}
 
 $tmpFile = tempnam(sys_get_temp_dir(), 'docx_');
 

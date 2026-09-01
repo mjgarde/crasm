@@ -55,46 +55,125 @@ $months = [
 <link href="../assets/vendor/bootstrap-5.3.8/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="../assets/vendor/fontawesome-free-7.3.1/css/all.min.css">
 <style>
-.filter-row {
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.filter-bar .search-wrap {
+    flex: 1 1 220px;
+    min-width: 160px;
+}
+.filter-toggle-btn {
+    position: relative;
+    white-space: nowrap;
+}
+.filter-toggle-btn .filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #0a1f44;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 1;
+    padding: 3px 5px;
+    font-weight: 700;
+}
+.filter-sort-select {
+    width: auto;
+    min-width: 150px;
+}
+.filter-panel {
+    display: none;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #eef0f3;
+}
+.filter-panel.show {
+    display: block;
+}
+.filter-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.filter-panel-header h6 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #6c757d;
+    margin: 0;
+}
+.filter-panel-close {
+    background: none;
+    border: none;
+    color: #6c757d;
     font-size: 14px;
+    line-height: 1;
+    padding: 4px;
 }
-.filter-row select,
-.filter-row .input-group,
-.filter-row .form-control,
-.filter-row .form-select {
-    font-size: 14px !important;
+.filter-panel-close:hover {
+    color: #0a1f44;
 }
-.filter-row .btn {
-    font-size: 13px !important;
+.filter-card .filter-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #6c757d;
+    margin-bottom: 4px;
+    display: block;
+}
+.filter-card .form-select,
+.filter-card .form-control {
+    font-size: 13px;
+}
+.filter-card select:disabled,
+.filter-card input:disabled {
+    background-color: #eef0f3 !important;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px 18px;
+}
+@media (max-width: 992px) {
+    .filter-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
 }
 @media (max-width: 768px) {
-    #filterProvince, #filterSect, #filterType, #filterSex, #filterYear, #filterMonth, #filterSort {
-        min-width: 0 !important;
-        max-width: none !important;
-        flex: 1 1 30%;
-    }
-    #searchInput, .input-group.input-group-sm.flex-grow-1 {
-        max-width: none !important;
-        flex: 1 1 100%;
-    }
-    .filter-row.d-flex {
-        font-size: 11px;
-    }
-    .filter-row .btn {
-        font-size: 10px !important;
-        padding: 0.25rem 0.4rem !important;
-    }
-    .filter-row select, .filter-row .input-group {
-        font-size: 11px !important;
+    .filter-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
-@media (max-width: 576px) {
-    #filterProvince, #filterSect, #filterType, #filterSex, #filterYear, #filterMonth, #filterSort {
-        flex: 1 1 45% !important;
-    }
-    .filter-row select, .filter-row .input-group {
-        font-size: 10px !important;
-    }
+.date-range-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.date-range-group input[type="date"] {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+.date-range-group span {
+    font-size: 11px;
+    color: #6c757d;
+    flex: 0 0 auto;
+}
+.filter-panel-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #eef0f3;
 }
 #authorityTableWrapper {
     min-height: 620px;
@@ -115,68 +194,27 @@ $months = [
 
     <main class="p-3 p-md-4">
 
-        <div class="card border-0 shadow-sm mb-3">
+        <div class="card border-0 shadow-sm mb-3 filter-card">
             <div class="card-body py-2">
-                <div class="filter-row d-flex flex-wrap align-items-center gap-2">
-                    <div class="input-group input-group-sm flex-grow-1" style="min-width:120px;max-width:200px;">
-                        <span class="input-group-text bg-white px-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size:10px;"></i></span>
-                        <input type="text" id="searchInput" class="form-control" placeholder="Search...">
+
+                <div class="filter-bar">
+                    <div class="search-wrap">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white px-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size:10px;"></i></span>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search CRASM# or Name...">
+                        </div>
                     </div>
-                    
-                    <select id="filterProvince" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:130px;">
-                        <option value="">All Provinces</option>
-                        <?php foreach ($provinces as $province): ?>
-                        <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    
-                    <select id="filterSect" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:140px;">
-                        <option value="">All Sects</option>
-                        <?php foreach ($religiousSects as $sect): ?>
-                        <option value="<?php echo htmlspecialchars($sect); ?>"><?php echo htmlspecialchars($sect); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    
-                    <select id="filterType" class="form-select form-select-sm" style="width:auto;min-width:80px;max-width:100px;">
-                        <option value="">All Types</option>
-                        <option value="New">New</option>
-                        <option value="Renewal">Renewal</option>
-                    </select>
-                    
-                    <select id="filterSex" class="form-select form-select-sm" style="width:auto;min-width:75px;max-width:90px;">
-                        <option value="">All Sex</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                    
-                    <select id="filterMonth" class="form-select form-select-sm" style="width:auto;min-width:100px;max-width:120px;">
-                        <option value="">All Months</option>
-                        <?php foreach ($months as $num => $name): ?>
-                        <option value="<?php echo $num; ?>"><?php echo htmlspecialchars($name); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    
-                    <select id="filterYear" class="form-select form-select-sm" style="width:auto;min-width:90px;max-width:110px;">
-                        <option value="">All Years</option>
-                        <?php
-                        $years = [];
-                        foreach ($authorityRecords as $r) {
-                            if (!empty($r['approved'])) {
-                                $years[substr($r['approved'], 0, 4)] = true;
-                            }
-                        }
-                        krsort($years);
-                        foreach (array_keys($years) as $year):
-                        ?>
-                        <option value="<?php echo htmlspecialchars($year); ?>"><?php echo htmlspecialchars($year); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                    
-                    <select id="filterSort" class="form-select form-select-sm" style="width:auto;min-width:130px;max-width:160px;">
+
+                    <button type="button" id="filterToggleBtn" class="btn btn-sm btn-outline-secondary filter-toggle-btn">
+                        <i class="fa-solid fa-filter me-1"></i> Filters <i class="fa-solid fa-chevron-down ms-1" style="font-size:10px;"></i>
+                        <span class="filter-count" id="filterCountBadge" style="display:none;">0</span>
+                    </button>
+
+                    <select id="filterSort" class="form-select form-select-sm filter-sort-select">
                         <option value="newest">Newest to Oldest</option>
                         <option value="oldest">Oldest to Newest</option>
                     </select>
-                    
+
                     <button type="button" id="exportWordBtn" class="btn btn-sm text-white" style="background-color:#2b5797;white-space:nowrap;">
                         <i class="fa-solid fa-file-word me-1"></i> Word
                     </button>
@@ -184,6 +222,108 @@ $months = [
                         <i class="fa-solid fa-plus me-1"></i> Add
                     </button>
                 </div>
+
+                <div class="filter-panel" id="filterPanel">
+                    <div class="filter-panel-header">
+                        <h6>Refine Results</h6>
+                        <button type="button" class="filter-panel-close" id="filterPanelCloseBtn">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-grid">
+
+                        <div>
+                            <label class="filter-label" for="filterProvince">Province</label>
+                            <select id="filterProvince" class="form-select form-select-sm">
+                                <option value="">All Provinces</option>
+                                <?php foreach ($provinces as $province): ?>
+                                <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="filter-label" for="filterSect">Religious Sect</label>
+                            <select id="filterSect" class="form-select form-select-sm">
+                                <option value="">All Sects</option>
+                                <?php foreach ($religiousSects as $sect): ?>
+                                <option value="<?php echo htmlspecialchars($sect); ?>"><?php echo htmlspecialchars($sect); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="filter-label" for="filterType">Type</label>
+                            <select id="filterType" class="form-select form-select-sm">
+                                <option value="">All Types</option>
+                                <option value="New">New</option>
+                                <option value="Renewal">Renewal</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="filter-label" for="filterSex">Sex</label>
+                            <select id="filterSex" class="form-select form-select-sm">
+                                <option value="">All Sex</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="filter-label" for="filterMonth">Month</label>
+                            <select id="filterMonth" class="form-select form-select-sm">
+                                <option value="">All Months</option>
+                                <?php foreach ($months as $num => $name): ?>
+                                <option value="<?php echo $num; ?>"><?php echo htmlspecialchars($name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="filter-label" for="filterYear">Year</label>
+                            <select id="filterYear" class="form-select form-select-sm">
+                                <option value="">All Years</option>
+                                <?php
+                                $years = [];
+                                foreach ($authorityRecords as $r) {
+                                    if (!empty($r['approved'])) {
+                                        $years[substr($r['approved'], 0, 4)] = true;
+                                    }
+                                }
+                                krsort($years);
+                                foreach (array_keys($years) as $year):
+                                ?>
+                                <option value="<?php echo htmlspecialchars($year); ?>"><?php echo htmlspecialchars($year); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div style="grid-column: span 2;">
+                            <label class="filter-label">Date Range</label>
+                            <div class="date-range-group">
+                                <input type="date" id="filterDateFrom" class="form-control form-control-sm" title="From date">
+                                <span>to</span>
+                                <input type="date" id="filterDateTo" class="form-control form-control-sm" title="To date">
+                                <button type="button" id="clearDateRangeBtn" class="btn btn-sm btn-outline-secondary" title="Clear date range" style="display:none;">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="filter-panel-footer">
+                        <button type="button" id="resetFiltersBtn" class="btn btn-sm btn-outline-secondary">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Reset All
+                        </button>
+                        <button type="button" class="btn btn-sm text-white" style="background-color:#0a1f44;" id="applyFiltersBtn">
+                            Apply
+                        </button>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -469,13 +609,123 @@ document.addEventListener('DOMContentLoaded', function () {
     const filterSex = document.getElementById('filterSex');
     const filterMonth = document.getElementById('filterMonth');
     const filterYear = document.getElementById('filterYear');
+    const filterDateFrom = document.getElementById('filterDateFrom');
+    const filterDateTo = document.getElementById('filterDateTo');
+    const clearDateRangeBtn = document.getElementById('clearDateRangeBtn');
     const filterSort = document.getElementById('filterSort');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    const filterToggleBtn = document.getElementById('filterToggleBtn');
+    const filterPanel = document.getElementById('filterPanel');
+    const filterPanelCloseBtn = document.getElementById('filterPanelCloseBtn');
+    const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+    const filterCountBadge = document.getElementById('filterCountBadge');
     const tableBody = document.querySelector('#authorityTable tbody');
     const allRows = Array.from(tableBody.querySelectorAll('tr.authority-row'));
     const paginationControls = document.getElementById('paginationControls');
     const paginationInfo = document.getElementById('paginationInfo');
     const authorityTotal = document.getElementById('authorityTotal');
     let currentPage = 1;
+
+    function isDateRangeActive() {
+        return !!(filterDateFrom.value || filterDateTo.value);
+    }
+
+    function isMonthYearActive() {
+        return !!(filterMonth.value || filterYear.value);
+    }
+
+    function syncFilterAvailability() {
+        if (isDateRangeActive()) {
+            filterMonth.disabled = true;
+            filterYear.disabled = true;
+            filterMonth.value = '';
+            filterYear.value = '';
+            clearDateRangeBtn.style.display = '';
+        } else if (isMonthYearActive()) {
+            filterDateFrom.disabled = true;
+            filterDateTo.disabled = true;
+            clearDateRangeBtn.style.display = 'none';
+        } else {
+            filterMonth.disabled = false;
+            filterYear.disabled = false;
+            filterDateFrom.disabled = false;
+            filterDateTo.disabled = false;
+            clearDateRangeBtn.style.display = 'none';
+        }
+    }
+
+    clearDateRangeBtn.addEventListener('click', function () {
+        filterDateFrom.value = '';
+        filterDateTo.value = '';
+        syncFilterAvailability();
+        currentPage = 1;
+        updateFilterCount();
+        renderTable();
+    });
+
+    resetFiltersBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        filterProvince.value = '';
+        filterSect.value = '';
+        filterType.value = '';
+        filterSex.value = '';
+        filterMonth.value = '';
+        filterYear.value = '';
+        filterDateFrom.value = '';
+        filterDateTo.value = '';
+        filterSort.value = 'newest';
+        syncFilterAvailability();
+        currentPage = 1;
+        updateFilterCount();
+        renderTable();
+    });
+
+    function updateFilterCount() {
+        let count = 0;
+        if (filterProvince.value) count++;
+        if (filterSect.value) count++;
+        if (filterType.value) count++;
+        if (filterSex.value) count++;
+        if (filterMonth.value) count++;
+        if (filterYear.value) count++;
+        if (filterDateFrom.value) count++;
+        if (filterDateTo.value) count++;
+
+        if (count > 0) {
+            filterCountBadge.textContent = count;
+            filterCountBadge.style.display = '';
+        } else {
+            filterCountBadge.style.display = 'none';
+        }
+    }
+
+    function openFilterPanel() {
+        filterPanel.classList.add('show');
+    }
+
+    function closeFilterPanel() {
+        filterPanel.classList.remove('show');
+    }
+
+    filterToggleBtn.addEventListener('click', function () {
+        filterPanel.classList.contains('show') ? closeFilterPanel() : openFilterPanel();
+    });
+
+    filterPanelCloseBtn.addEventListener('click', closeFilterPanel);
+
+    applyFiltersBtn.addEventListener('click', function () {
+        closeFilterPanel();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!filterPanel.contains(e.target) && !filterToggleBtn.contains(e.target) && filterPanel.classList.contains('show')) {
+            closeFilterPanel();
+        }
+    });
+
+    filterPanel.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
 
     function getFilteredRows() {
         const searchTerm = searchInput.value.trim().toLowerCase();
@@ -485,6 +735,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const sex = filterSex.value;
         const month = filterMonth.value;
         const year = filterYear.value;
+        const dateFrom = filterDateFrom.value;
+        const dateTo = filterDateTo.value;
         const sort = filterSort.value;
 
         let filtered = allRows.filter(function (row) {
@@ -496,9 +748,24 @@ document.addEventListener('DOMContentLoaded', function () {
             const matchesSect = !sect || row.dataset.sect === sect;
             const matchesType = !type || row.dataset.type === type;
             const matchesSex = !sex || row.dataset.sex === sex;
-            const matchesMonth = !month || row.dataset.month === month;
-            const matchesYear = !year || row.dataset.year === year;
-            return matchesSearch && matchesProvince && matchesSect && matchesType && matchesSex && matchesMonth && matchesYear;
+
+            const rowDate = row.dataset.date || '';
+
+            let matchesDate = true;
+            if (dateFrom || dateTo) {
+                if (!rowDate) {
+                    matchesDate = false;
+                } else {
+                    if (dateFrom && rowDate < dateFrom) matchesDate = false;
+                    if (dateTo && rowDate > dateTo) matchesDate = false;
+                }
+            } else {
+                const matchesMonth = !month || row.dataset.month === month;
+                const matchesYear = !year || row.dataset.year === year;
+                matchesDate = matchesMonth && matchesYear;
+            }
+
+            return matchesSearch && matchesProvince && matchesSect && matchesType && matchesSex && matchesDate;
         });
 
         filtered.sort(function (a, b) {
@@ -583,17 +850,39 @@ document.addEventListener('DOMContentLoaded', function () {
         paginationControls.appendChild(nextItem);
     }
 
-    [searchInput, filterProvince, filterSect, filterType, filterSex, filterMonth, filterYear, filterSort].forEach(function (control) {
+    [searchInput, filterProvince, filterSect, filterType, filterSex, filterSort].forEach(function (control) {
         control.addEventListener('input', function () {
             currentPage = 1;
+            updateFilterCount();
             renderTable();
         });
         control.addEventListener('change', function () {
             currentPage = 1;
+            updateFilterCount();
             renderTable();
         });
     });
 
+    [filterMonth, filterYear].forEach(function (control) {
+        control.addEventListener('change', function () {
+            syncFilterAvailability();
+            currentPage = 1;
+            updateFilterCount();
+            renderTable();
+        });
+    });
+
+    [filterDateFrom, filterDateTo].forEach(function (control) {
+        control.addEventListener('change', function () {
+            syncFilterAvailability();
+            currentPage = 1;
+            updateFilterCount();
+            renderTable();
+        });
+    });
+
+    syncFilterAvailability();
+    updateFilterCount();
     renderTable();
 
     const exportWordBtn = document.getElementById('exportWordBtn');
@@ -603,8 +892,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (filterSect.value) params.set('sect', filterSect.value);
         if (filterType.value) params.set('type', filterType.value);
         if (filterSex.value) params.set('sex', filterSex.value);
-        if (filterMonth.value) params.set('month', filterMonth.value);
-        if (filterYear.value) params.set('year', filterYear.value);
+
+        if (isDateRangeActive()) {
+            if (filterDateFrom.value) params.set('date_from', filterDateFrom.value);
+            if (filterDateTo.value) params.set('date_to', filterDateTo.value);
+        } else {
+            if (filterMonth.value) params.set('month', filterMonth.value);
+            if (filterYear.value) params.set('year', filterYear.value);
+        }
 
         const query = params.toString();
         window.location.href = '../actions/authority_export_word.php' + (query ? '?' + query : '');

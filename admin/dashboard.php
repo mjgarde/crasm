@@ -23,7 +23,45 @@ $provinces = [
 ];
 
 $allStmt = $db->query('SELECT * FROM authority_records');
-$allRecords = $allStmt->fetchAll(PDO::FETCH_ASSOC);
+$allRecordsRaw = $allStmt->fetchAll(PDO::FETCH_ASSOC);
+
+$availableYears = [];
+foreach ($allRecordsRaw as $r) {
+    $refDate = $r['filed'] ?? $r['created_at'] ?? '';
+    if ($refDate !== '') {
+        $availableYears[substr($refDate, 0, 4)] = true;
+    }
+}
+krsort($availableYears);
+$availableYears = array_map('strval', array_keys($availableYears));
+
+$selectedYear = (string) ($_GET['year'] ?? ($availableYears[0] ?? date('Y')));
+if ($selectedYear !== 'all' && !in_array($selectedYear, $availableYears, true)) {
+    $selectedYear = $availableYears[0] ?? date('Y');
+}
+
+$selectedQuarter = $_GET['quarter'] ?? 'all';
+if (!in_array($selectedQuarter, ['all', '1', '2', '3', '4'], true)) {
+    $selectedQuarter = 'all';
+}
+
+$allRecords = array_values(array_filter($allRecordsRaw, function ($r) use ($selectedYear, $selectedQuarter) {
+    $refDate = $r['filed'] ?? $r['created_at'] ?? '';
+    if ($refDate === '') {
+        return false;
+    }
+    if ($selectedYear !== 'all' && substr($refDate, 0, 4) !== $selectedYear) {
+        return false;
+    }
+    if ($selectedQuarter !== 'all') {
+        $refMonth = (int) substr($refDate, 5, 2);
+        $refQuarter = (int) ceil($refMonth / 3);
+        if ($refQuarter !== (int) $selectedQuarter) {
+            return false;
+        }
+    }
+    return true;
+}));
 
 $totalRecords = count($allRecords);
 
@@ -49,11 +87,33 @@ $stageCounts = [
 ];
 
 $currentMonth = date('Y-m');
+
 $monthlyTrend = [];
-for ($i = 5; $i >= 0; $i--) {
-    $m = date('Y-m', strtotime("-$i months"));
-    $monthlyTrend[$m] = ['New' => 0, 'Renewal' => 0];
+if ($selectedYear === 'all') {
+    for ($i = 5; $i >= 0; $i--) {
+        $m = date('Y-m', strtotime("-$i months"));
+        $monthlyTrend[$m] = ['New' => 0, 'Renewal' => 0];
+    }
+} elseif ($selectedQuarter !== 'all') {
+    $startMonth = ((int) $selectedQuarter - 1) * 3 + 1;
+    for ($i = 0; $i < 3; $i++) {
+        $key = $selectedYear . '-' . str_pad($startMonth + $i, 2, '0', STR_PAD_LEFT);
+        $monthlyTrend[$key] = ['New' => 0, 'Renewal' => 0];
+    }
+} else {
+    for ($m = 1; $m <= 12; $m++) {
+        $key = $selectedYear . '-' . str_pad($m, 2, '0', STR_PAD_LEFT);
+        $monthlyTrend[$key] = ['New' => 0, 'Renewal' => 0];
+    }
 }
+
+$quarterLabels = ['Q1', 'Q2', 'Q3', 'Q4'];
+$quarterlyTrend = [
+    'Q1' => ['New' => 0, 'Renewal' => 0],
+    'Q2' => ['New' => 0, 'Renewal' => 0],
+    'Q3' => ['New' => 0, 'Renewal' => 0],
+    'Q4' => ['New' => 0, 'Renewal' => 0],
+];
 
 foreach ($allRecords as $r) {
     if ($r['type'] === 'New') {
@@ -101,10 +161,16 @@ foreach ($allRecords as $r) {
         }
     }
 
-    if (!empty($r['filed'])) {
+    if (!empty($r['filed']) && isset($r['type']) && in_array($r['type'], ['New', 'Renewal'], true)) {
         $m = substr($r['filed'], 0, 7);
-        if (isset($monthlyTrend[$m]) && isset($r['type'])) {
+        if (isset($monthlyTrend[$m])) {
             $monthlyTrend[$m][$r['type']]++;
+        }
+
+        $filedMonth = (int) substr($r['filed'], 5, 2);
+        $q = 'Q' . (int) ceil($filedMonth / 3);
+        if (isset($quarterlyTrend[$q])) {
+            $quarterlyTrend[$q][$r['type']]++;
         }
     }
 }
@@ -123,6 +189,9 @@ $recentRecords = array_slice($allRecords, 0, 8);
 $monthLabels = array_map(fn($m) => date('M', strtotime($m . '-01')), array_keys($monthlyTrend));
 $monthNewData = array_map(fn($v) => $v['New'], array_values($monthlyTrend));
 $monthRenewalData = array_map(fn($v) => $v['Renewal'], array_values($monthlyTrend));
+
+$quarterNewData = array_map(fn($v) => $v['New'], array_values($quarterlyTrend));
+$quarterRenewalData = array_map(fn($v) => $v['Renewal'], array_values($quarterlyTrend));
 
 ?>
 
@@ -183,7 +252,16 @@ body {
   color: var(--ink);
   margin: 0;
 }
-.page-heading .as-of { font-size: .78rem; color: var(--ink-faint); }
+.year-select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: .45rem .8rem;
+  font-size: .82rem;
+  font-weight: 500;
+  color: var(--ink);
+  background-color: var(--surface);
+}
+.year-select:focus { outline: none; border-color: var(--psa-blue); }
 
 .kpi-strip {
   background-color: var(--surface);
@@ -234,6 +312,25 @@ body {
 .panel-head h2 { font-size: .95rem; font-weight: 600; color: var(--ink); margin: 0; }
 .panel-head p { font-size: .76rem; color: var(--ink-faint); margin: .15rem 0 0; }
 .panel-body { padding: 1.15rem 1.2rem; }
+
+.granularity-toggle {
+  display: flex;
+  gap: .2rem;
+  background-color: var(--canvas);
+  border-radius: 7px;
+  padding: .2rem;
+}
+.granularity-toggle button {
+  border: none;
+  background: none;
+  padding: .35rem .75rem;
+  font-size: .74rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.granularity-toggle button.active { background-color: var(--surface); color: var(--psa-blue); box-shadow: 0 1px 2px rgba(27,37,48,.1); }
 
 .legend-row {
   display: flex;
@@ -298,7 +395,21 @@ body {
 
     <div class="page-heading">
       <h1>Dashboard</h1>
-      <span class="as-of">As of <?= date('F j, Y') ?></span>
+      <form method="GET" class="d-flex gap-2">
+        <select name="year" class="year-select" onchange="this.form.submit()">
+          <option value="all" <?= $selectedYear === 'all' ? 'selected' : '' ?>>All years</option>
+          <?php foreach ($availableYears as $y): ?>
+            <option value="<?= htmlspecialchars($y) ?>" <?= $selectedYear === $y ? 'selected' : '' ?>>Year <?= htmlspecialchars($y) ?></option>
+          <?php endforeach; ?>
+        </select>
+        <select name="quarter" class="year-select" onchange="this.form.submit()">
+          <option value="all" <?= $selectedQuarter === 'all' ? 'selected' : '' ?>>All quarters</option>
+          <option value="1" <?= $selectedQuarter === '1' ? 'selected' : '' ?>>Q1 (Jan&ndash;Mar)</option>
+          <option value="2" <?= $selectedQuarter === '2' ? 'selected' : '' ?>>Q2 (Apr&ndash;Jun)</option>
+          <option value="3" <?= $selectedQuarter === '3' ? 'selected' : '' ?>>Q3 (Jul&ndash;Sep)</option>
+          <option value="4" <?= $selectedQuarter === '4' ? 'selected' : '' ?>>Q4 (Oct&ndash;Dec)</option>
+        </select>
+      </form>
     </div>
 
     <div class="kpi-strip">
@@ -353,7 +464,20 @@ body {
           <div class="panel-head">
             <div>
               <h2>Filing trend</h2>
-              <p>New vs. renewal applications filed, last 6 months.</p>
+              <p>New vs. renewal applications filed<?php
+                if ($selectedYear === 'all') {
+                    echo ', last 6 months';
+                } else {
+                    echo ', ' . htmlspecialchars($selectedYear);
+                    if ($selectedQuarter !== 'all') {
+                        echo ' Q' . htmlspecialchars($selectedQuarter);
+                    }
+                }
+              ?>.</p>
+            </div>
+            <div class="granularity-toggle">
+              <button type="button" id="btnMonthly" class="active" onclick="setTrendView('monthly')">Monthly</button>
+              <button type="button" id="btnQuarterly" onclick="setTrendView('quarterly')">Quarterly</button>
             </div>
           </div>
           <div class="panel-body">
@@ -509,14 +633,27 @@ body {
 Chart.defaults.font = { family: 'IBM Plex Sans', size: 11 };
 Chart.defaults.color = '#5C6773';
 
-new Chart(document.getElementById('trendChart'), {
+const trendData = {
+  monthly: {
+    labels: <?= json_encode($monthLabels) ?>,
+    newData: <?= json_encode($monthNewData) ?>,
+    renewalData: <?= json_encode($monthRenewalData) ?>,
+  },
+  quarterly: {
+    labels: <?= json_encode($quarterLabels) ?>,
+    newData: <?= json_encode($quarterNewData) ?>,
+    renewalData: <?= json_encode($quarterRenewalData) ?>,
+  }
+};
+
+const trendChart = new Chart(document.getElementById('trendChart'), {
   type: 'line',
   data: {
-    labels: <?= json_encode($monthLabels) ?>,
+    labels: trendData.monthly.labels,
     datasets: [
       {
         label: 'New',
-        data: <?= json_encode($monthNewData) ?>,
+        data: trendData.monthly.newData,
         borderColor: '#B8873A',
         backgroundColor: 'rgba(184,135,58,0.1)',
         fill: true,
@@ -525,7 +662,7 @@ new Chart(document.getElementById('trendChart'), {
       },
       {
         label: 'Renewal',
-        data: <?= json_encode($monthRenewalData) ?>,
+        data: trendData.monthly.renewalData,
         borderColor: '#0B3D7A',
         backgroundColor: 'rgba(11,61,122,0.08)',
         fill: true,
@@ -545,7 +682,19 @@ new Chart(document.getElementById('trendChart'), {
   }
 });
 
-new Chart(document.getElementById('sectChart'), {
+function setTrendView(view) {
+  trendChart.data.labels = trendData[view].labels;
+  trendChart.data.datasets[0].data = trendData[view].newData;
+  trendChart.data.datasets[1].data = trendData[view].renewalData;
+  trendChart.update();
+
+  document.getElementById('btnMonthly').classList.toggle('active', view === 'monthly');
+  document.getElementById('btnQuarterly').classList.toggle('active', view === 'quarterly');
+}
+
+const sectCanvas = document.getElementById('sectChart');
+if (sectCanvas) {
+  new Chart(sectCanvas, {
   type: 'bar',
   data: {
     labels: <?= json_encode(array_keys($topSects)) ?>,
@@ -566,7 +715,8 @@ new Chart(document.getElementById('sectChart'), {
       y: { grid: { display: false } }
     }
   }
-});
+  });
+}
 
 new Chart(document.getElementById('provinceChart'), {
   type: 'bar',
