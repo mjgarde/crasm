@@ -105,24 +105,361 @@ $csrf = $_SESSION['csrf_token'];
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/dashboard.css">
 <style>
-    .btn-navy { background:#002d62; color:#fff; border:0; } .btn-navy:hover { background:#01204a; color:#fff; }
-    .btn-add { background:#0B3D7A; color:#fff; border:0; border-radius:6px; padding:.3rem .85rem; white-space:nowrap; font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:8px; }
-    .btn-add:hover { background:#082f5f; color:#fff; }
-    .avatar { width:34px; height:34px; border-radius:50%; color:#fff; font-weight:600; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; font-size:13px; }
-    .act { width:32px; height:32px; padding:0; border-radius:7px; border:0; color:#fff; box-shadow:0 1px 3px rgba(0,0,0,.18); transition:background .15s, transform .1s; }
-    .act:hover { transform:translateY(-1px); color:#fff; }
-    .act.edit { background:#0B3D7A; }
-    .act.edit:hover { background:#082C59; }
-    .act.del { background:#8E1B27; }
-    .act.del:hover { background:#6E1420; }
-    .count-pill { display:inline-block; margin-left:6px; padding:1px 10px; border-radius:999px; background:#0B3D7A; color:#fff; font-size:12px; font-weight:600; vertical-align:middle; }
-    .um-search { max-width:280px; }
-    .form-control:focus { border-color:#0B3D7A; box-shadow:0 0 0 .2rem rgba(11,61,122,.15); }
-    .modal-header.navy { background:#002d62; color:#fff; border:0; }
-    .admin-box { background:#FFF8E6; border:1px solid #F3DFA2; border-radius:8px; padding:12px; }
-    .user-badge { display:inline-block; padding:2px 9px; border:1px solid #E3E8EF; border-radius:999px; background:#F7F9FC; font-size:12px; }
+    :root {
+        --navy: #002d62;
+        --blue: #0b3d7a;
+        --blue-dark: #082f5f;
+        --red: #a3202f;
+        --ink: #1b2433;
+        --muted: #6b7688;
+        --line: #e3e8ef;
+        --soft: #f7f9fc;
+    }
+
+    body {
+        background: #f1f4f8;
+        color: var(--ink);
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .um-wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .um-card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(10, 31, 68, .06);
+        overflow: hidden;
+    }
+
+    .um-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: .85rem 1rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .um-title {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        min-width: 0;
+    }
+
+    .um-title-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #e8eef7;
+        color: var(--blue);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .um-title h1 {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .um-title p {
+        font-size: .8rem;
+        color: var(--muted);
+        margin: 0;
+    }
+
+    .count-pill {
+        display: inline-block;
+        margin-left: 6px;
+        padding: 1px 10px;
+        border-radius: 999px;
+        background: var(--blue);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        vertical-align: middle;
+    }
+
+    .um-tools {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+    }
+
+    .um-search {
+        width: 280px;
+    }
+
+    .um-search .form-control,
+    .um-search .input-group-text {
+        height: 36px;
+        font-size: 13px;
+    }
+
+    .btn-add {
+        height: 36px;
+        background: var(--blue);
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 1rem;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-add:hover {
+        background: var(--blue-dark);
+        color: #fff;
+    }
+
+    .btn-navy {
+        background: var(--navy);
+        color: #fff;
+        border: 0;
+    }
+
+    .btn-navy:hover {
+        background: #01204a;
+        color: #fff;
+    }
+
+    .um-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .um-table thead th {
+        background: var(--soft);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        padding: .7rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+    }
+
+    .um-table tbody td {
+        padding: .8rem 1.25rem;
+        border-bottom: 1px solid var(--line);
+        vertical-align: middle;
+    }
+
+    .um-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .um-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        color: #fff;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 13px;
+    }
+
+    .user-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: var(--soft);
+        font-size: 12px;
+        word-break: break-all;
+    }
+
+    .act {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        border-radius: 7px;
+        border: 0;
+        color: #fff;
+        transition: background .15s;
+    }
+
+    .act:hover {
+        color: #fff;
+    }
+
+    .act.edit {
+        background: var(--blue);
+    }
+
+    .act.edit:hover {
+        background: #082c59;
+    }
+
+    .act.del {
+        background: #8e1b27;
+    }
+
+    .act.del:hover {
+        background: #6e1420;
+    }
+
+    .um-empty {
+        text-align: center;
+        color: var(--muted);
+        padding: 2.5rem 1rem;
+    }
+
+    .um-empty i {
+        font-size: 28px;
+        opacity: .4;
+        margin-bottom: .5rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 .2rem rgba(11, 61, 122, .15);
+    }
+
+    .modal-header.navy {
+        background: var(--navy);
+        color: #fff;
+        border: 0;
+    }
+
+    .um-modal {
+        max-width: 460px;
+    }
+
+    .admin-box {
+        background: #fff8e6;
+        border: 1px solid #f3dfa2;
+        border-radius: 8px;
+        padding: 12px;
+    }
+
+    @media (max-width: 767.98px) {
+        .um-head {
+            padding: .9rem 1rem;
+        }
+
+        .um-tools {
+            width: 100%;
+        }
+
+        .um-search {
+            flex: 1 1 auto;
+            width: auto;
+            min-width: 0;
+        }
+
+        .um-table thead {
+            display: none;
+        }
+
+        .um-table,
+        .um-table tbody {
+            display: block;
+        }
+
+        .um-table tbody tr {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: .55rem .75rem;
+            padding: .95rem 1rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .um-table tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        .um-table tbody td {
+            display: block;
+            padding: 0;
+            border: 0;
+        }
+
+        .um-table td.c-num {
+            display: none;
+        }
+
+        .um-table td.c-name {
+            grid-column: 1;
+            min-width: 0;
+        }
+
+        .um-table td.c-actions {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            gap: .4rem;
+        }
+
+        .um-table td.c-actions .act {
+            width: 38px;
+            height: 38px;
+            margin: 0;
+        }
+
+        .um-table td.c-user,
+        .um-table td.c-created,
+        .um-table td.c-updated {
+            grid-column: 1 / -1;
+        }
+
+        .um-table td.c-created,
+        .um-table td.c-updated {
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .um-table td.c-created::before,
+        .um-table td.c-updated::before {
+            content: attr(data-label);
+            color: var(--ink);
+            font-weight: 500;
+        }
+
+        .um-table td.c-user::before {
+            content: 'Username';
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .btn-add .lbl {
+            display: none;
+        }
+
+        .btn-add {
+            width: 40px;
+            padding: 0;
+        }
+    }
 </style>
 </head>
 <body>
@@ -131,54 +468,65 @@ $csrf = $_SESSION['csrf_token'];
 
 <div class="min-vh-100">
   <main class="p-3 p-md-4">
-  <div class="dash-shell">
+  <div class="um-wrap">
 
     <?php if ($dbError): ?><div class="alert alert-danger py-2"><?= h($dbError) ?></div><?php endif; ?>
 
-    <section class="panel">
-      <div class="panel-head">
-        <div>
-          <h2>Total users <span class="count-pill"><?= count($users) ?></span></h2>
+    <section class="um-card">
+      <div class="um-head">
+        <div class="um-title">
+          <span class="um-title-icon"><i class="fa-solid fa-users"></i></span>
+          <div>
+            <h1>Users <span class="count-pill"><?= count($users) ?></span></h1>
+            <p>Manage accounts that can access the system</p>
+          </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="um-tools">
           <div class="input-group input-group-sm um-search">
             <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
             <input type="text" id="search" class="form-control" placeholder="Search name or username...">
           </div>
-          <button class="btn-add" id="btnAdd"><i class="fa-solid fa-user-plus"></i> Add user</button>
+          <button class="btn-add" id="btnAdd" type="button"><i class="fa-solid fa-user-plus"></i><span class="lbl">Add user</span></button>
         </div>
       </div>
-      <div class="table-responsive">
-        <table class="recent-table">
-          <thead>
-            <tr><th style="width:56px;">#</th><th>Name</th><th>Username</th><th>Created</th><th>Last updated</th><th class="text-end">Actions</th></tr>
-          </thead>
-          <tbody id="tbody">
-          <?php $colors = ['#0B3D7A', '#B8873A', '#A3202F', '#2F7D5A', '#5B4B8A', '#0F766E']; $n = count($users); ?>
-          <?php foreach ($users as $i => $u): ?>
-            <tr data-id="<?= (int) $u['id'] ?>" data-name="<?= h($u['name']) ?>" data-username="<?= h($u['username']) ?>">
-              <td class="text-muted"><?= $n - $i ?></td>
-              <td>
-                <div class="d-flex align-items-center gap-2">
-                  <span class="avatar" style="background:<?= $colors[$u['id'] % count($colors)] ?>;"><?= h(strtoupper(mb_substr($u['name'], 0, 1))) ?></span>
-                  <span class="fw-semibold"><?= h($u['name']) ?></span>
-                </div>
-              </td>
-              <td><span class="user-badge"><?= h($u['username']) ?></span></td>
-              <td class="text-muted"><?= h(date('M d, Y', strtotime($u['created_at']))) ?></td>
-              <td class="text-muted"><?= h(date('M d, Y h:i A', strtotime($u['updated_at']))) ?></td>
-              <td class="text-end">
-                <button class="act edit me-1" title="Edit"><i class="fa-solid fa-pen"></i></button>
-                <button class="act del" title="Delete"><i class="fa-solid fa-trash"></i></button>
-              </td>
-            </tr>
-          <?php endforeach; ?>
-          </tbody>
-        </table>
-        <div id="empty" class="text-center text-muted py-4 <?= $users ? 'd-none' : '' ?>">
-          <i class="fa-solid fa-user-slash mb-2" style="font-size:26px;opacity:.4;"></i>
-          <div id="emptyText"><?= $users ? 'No matching users.' : 'No users yet. Click "Add user" to create one.' ?></div>
-        </div>
+
+      <table class="um-table">
+        <thead>
+          <tr>
+            <th style="width:64px;">#</th>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Created</th>
+            <th>Last updated</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+        <?php $colors = ['#0B3D7A', '#B8873A', '#A3202F', '#2F7D5A', '#5B4B8A', '#0F766E']; $n = count($users); ?>
+        <?php foreach ($users as $i => $u): ?>
+          <tr data-id="<?= (int) $u['id'] ?>" data-name="<?= h($u['name']) ?>" data-username="<?= h($u['username']) ?>">
+            <td class="c-num text-muted"><?= $n - $i ?></td>
+            <td class="c-name">
+              <div class="d-flex align-items-center gap-2">
+                <span class="avatar" style="background:<?= $colors[$u['id'] % count($colors)] ?>;"><?= h(strtoupper(mb_substr($u['name'], 0, 1))) ?></span>
+                <span class="fw-semibold text-break"><?= h($u['name']) ?></span>
+              </div>
+            </td>
+            <td class="c-user"><span class="user-badge"><?= h($u['username']) ?></span></td>
+            <td class="c-created text-muted" data-label="Created"><span><?= h(date('M d, Y', strtotime($u['created_at']))) ?></span></td>
+            <td class="c-updated text-muted" data-label="Last updated"><span><?= h(date('M d, Y h:i A', strtotime($u['updated_at']))) ?></span></td>
+            <td class="c-actions text-end">
+              <button class="act edit me-1" type="button" title="Edit" aria-label="Edit user"><i class="fa-solid fa-pen"></i></button>
+              <button class="act del" type="button" title="Delete" aria-label="Delete user"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table>
+
+      <div id="empty" class="um-empty <?= $users ? 'd-none' : '' ?>">
+        <i class="fa-solid fa-user-slash d-block"></i>
+        <div id="emptyText"><?= $users ? 'No matching users.' : 'No users yet. Click "Add user" to create one.' ?></div>
       </div>
     </section>
 
@@ -187,27 +535,38 @@ $csrf = $_SESSION['csrf_token'];
 </div>
 
 <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:460px;">
+    <div class="modal-dialog modal-dialog-centered um-modal">
         <div class="modal-content border-0 shadow">
             <div class="modal-header navy">
                 <h5 class="modal-title" id="userModalTitle" style="font-size:15px;font-weight:600;"></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="userForm" class="modal-body" autocomplete="off" novalidate>
                 <div id="userAlert" class="alert alert-danger py-2 px-3 d-none" style="font-size:12px;"></div>
                 <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
-                <input type="hidden" name="um_action" id="uAction"><input type="hidden" name="id" id="uId">
-                <div class="mb-3"><label class="form-label fw-semibold mb-1">Full Name</label>
-                    <input type="text" class="form-control form-control-sm" name="name" id="uName" maxlength="255" required></div>
-                <div class="mb-3"><label class="form-label fw-semibold mb-1">Username</label>
-                    <input type="text" class="form-control form-control-sm" name="username" id="uUser" maxlength="50" required></div>
-                <div class="mb-3"><label class="form-label fw-semibold mb-1">Password <span id="uPassNote" class="text-muted fw-normal"></span></label>
-                    <div class="input-group input-group-sm"><input type="password" class="form-control" name="password" id="uPass" autocomplete="new-password">
-                    <button class="btn btn-outline-secondary tg" type="button" tabindex="-1"><i class="fa-solid fa-eye"></i></button></div></div>
+                <input type="hidden" name="um_action" id="uAction">
+                <input type="hidden" name="id" id="uId">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold mb-1" for="uName">Full Name</label>
+                    <input type="text" class="form-control form-control-sm" name="name" id="uName" maxlength="255" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold mb-1" for="uUser">Username</label>
+                    <input type="text" class="form-control form-control-sm" name="username" id="uUser" maxlength="50" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold mb-1" for="uPass">Password <span id="uPassNote" class="text-muted fw-normal"></span></label>
+                    <div class="input-group input-group-sm">
+                        <input type="password" class="form-control" name="password" id="uPass" autocomplete="new-password">
+                        <button class="btn btn-outline-secondary tg" type="button" tabindex="-1" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+                    </div>
+                </div>
                 <div class="admin-box mb-3 d-none" id="uAdminBox">
-                    <label class="form-label fw-semibold mb-1"><i class="fa-solid fa-shield-halved me-1"></i>Administrator Password</label>
-                    <div class="input-group input-group-sm"><input type="password" class="form-control" name="admin_password" id="uAdminPass" autocomplete="current-password">
-                    <button class="btn btn-outline-secondary tg" type="button" tabindex="-1"><i class="fa-solid fa-eye"></i></button></div>
+                    <label class="form-label fw-semibold mb-1" for="uAdminPass"><i class="fa-solid fa-shield-halved me-1"></i>Administrator Password</label>
+                    <div class="input-group input-group-sm">
+                        <input type="password" class="form-control" name="admin_password" id="uAdminPass" autocomplete="current-password">
+                        <button class="btn btn-outline-secondary tg" type="button" tabindex="-1" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-navy btn-sm w-100 py-2" id="uSubmit"><span class="spinner-border spinner-border-sm d-none me-1"></span><span>Save</span></button>
             </form>
@@ -216,22 +575,25 @@ $csrf = $_SESSION['csrf_token'];
 </div>
 
 <div class="modal fade" id="delModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-dialog modal-dialog-centered um-modal">
         <div class="modal-content border-0 shadow">
             <div class="modal-body p-4">
                 <div class="text-center mb-3">
                     <div class="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle" style="width:56px;height:56px;background:#fdecee;color:#a3202f;font-size:22px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     <h5 class="fw-bold mb-1" style="font-size:16px;">Delete this user?</h5>
-                    <div class="text-muted">You are about to delete <strong id="delName"></strong>. This action cannot be undone.</div>
+                    <div class="text-muted">You are about to delete <strong id="delName" class="text-break"></strong>. This action cannot be undone.</div>
                 </div>
                 <form id="delForm" autocomplete="off" novalidate>
                     <div id="delAlert" class="alert alert-danger py-2 px-3 d-none" style="font-size:12px;"></div>
                     <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
-                    <input type="hidden" name="um_action" value="delete"><input type="hidden" name="id" id="delId">
+                    <input type="hidden" name="um_action" value="delete">
+                    <input type="hidden" name="id" id="delId">
                     <div class="admin-box mb-3">
-                        <label class="form-label fw-semibold mb-1"><i class="fa-solid fa-shield-halved me-1"></i>Administrator Password</label>
-                        <div class="input-group input-group-sm"><input type="password" class="form-control" name="admin_password" id="delPass" autocomplete="current-password">
-                        <button class="btn btn-outline-secondary tg" type="button" tabindex="-1"><i class="fa-solid fa-eye"></i></button></div>
+                        <label class="form-label fw-semibold mb-1" for="delPass"><i class="fa-solid fa-shield-halved me-1"></i>Administrator Password</label>
+                        <div class="input-group input-group-sm">
+                            <input type="password" class="form-control" name="admin_password" id="delPass" autocomplete="current-password">
+                            <button class="btn btn-outline-secondary tg" type="button" tabindex="-1" aria-label="Show password"><i class="fa-solid fa-eye"></i></button>
+                        </div>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-light btn-sm w-50" data-bs-dismiss="modal">Cancel</button>
@@ -245,7 +607,10 @@ $csrf = $_SESSION['csrf_token'];
 
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:2000;">
     <div id="toast" class="toast align-items-center text-white border-0" role="alert">
-        <div class="d-flex"><div class="toast-body" id="toastMsg"></div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>
+        <div class="d-flex">
+            <div class="toast-body" id="toastMsg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
     </div>
 </div>
 
