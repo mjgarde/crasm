@@ -33,8 +33,8 @@ if (empty($_SESSION['backup_unlocked'])) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CRASM | Backup - Verify Access</title>
-        <link href="../assets/vendor/bootstrap-5.3.8/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="../assets/vendor/fontawesome-free-7.3.1/css/all.min.css">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     </head>
     <body class="bg-light">
     <?php require __DIR__ . '/../includes/navbar.php'; ?>
@@ -61,7 +61,7 @@ if (empty($_SESSION['backup_unlocked'])) {
             </div>
         </div>
     </div>
-    <script src="../assets/vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     </html>
     <?php
@@ -132,8 +132,8 @@ $statusMessage = $_GET['msg'] ?? '';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRASM | Backup</title>
-    <link href="../assets/vendor/bootstrap-5.3.8/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/vendor/fontawesome-free-7.3.1/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body class="bg-light">
 <?php require __DIR__ . '/../includes/navbar.php'; ?>
@@ -205,6 +205,6 @@ $statusMessage = $_GET['msg'] ?? '';
         </div>
     </div>
 </div>
-<script src="../assets/vendor/bootstrap-5.3.8/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
