@@ -1,12 +1,5 @@
 <?php
-
-session_start();
-
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
+require_once '../config/session_check.php';
 require_once '../config/database.php';
 
 $adminUsername = $_SESSION['admin_username'] ?? 'Administrator';
@@ -55,6 +48,12 @@ $months = [
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="stylesheet" href="../assets/css/authority.css">
+<style>
+    #addAuthorityModal .modal-content {
+        height: 100vh;
+        height: 100dvh;
+    }
+</style>
 </head>
 
 <body>
@@ -293,156 +292,154 @@ $months = [
 
 <div class="modal fade" id="addAuthorityModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content">
-            <form id="authorityForm" method="POST" action="../actions/authority_save.php">
-                <div class="modal-header py-2">
-                    <h6 class="modal-title fw-bold mb-0">Add Authority</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <form class="modal-content" id="authorityForm" method="POST" action="../actions/authority_save.php">
+            <div class="modal-header py-2">
+                <h6 class="modal-title fw-bold mb-0">Add Authority</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="overflow-y:auto;font-size:13px;">
+
+                <input type="hidden" name="id" id="authorityId">
+
+                <div class="d-flex align-items-center mb-1">
+                    <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Basic Information</h6>
+                    <hr class="flex-grow-1 my-0" style="opacity:.15;">
                 </div>
-                <div class="modal-body" style="overflow-y:auto;font-size:13px;">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <label for="crasm_no" class="form-label mb-1" style="font-size:12px;">CRASM#</label>
+                        <input type="text" class="form-control form-control-sm" id="crasm_no" name="crasm_no" style="font-size:13px;" required>
+                    </div>
+                    <div class="col-md-5">
+                        <label for="name_of_so" class="form-label mb-1" style="font-size:12px;">Name of SO</label>
+                        <input type="text" class="form-control form-control-sm" id="name_of_so" name="name_of_so" style="font-size:13px;" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="type" class="form-label mb-1" style="font-size:12px;">Type</label>
+                        <select class="form-select form-select-sm" id="type" name="type" style="font-size:13px;" required>
+                            <option value="">Select</option>
+                            <option value="New">New</option>
+                            <option value="Renewal">Renewal</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sex" class="form-label mb-1" style="font-size:12px;">Sex</label>
+                        <select class="form-select form-select-sm" id="sex" name="sex" style="font-size:13px;" required>
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="provinces" class="form-label mb-1" style="font-size:12px;">Province</label>
+                        <select class="form-select form-select-sm" id="provinces" name="provinces" style="font-size:13px;" required>
+                            <option value="">Select Province</option>
+                            <?php foreach ($provinces as $province): ?>
+                            <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="municipality" class="form-label mb-1" style="font-size:12px;">City/Municipality</label>
+                        <select class="form-select form-select-sm" id="municipality" name="municipality" style="font-size:13px;">
+                            <option value="">Select Province First</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="religious_sect" class="form-label mb-1" style="font-size:12px;">Religious Sect</label>
+                        <input type="text" class="form-control form-control-sm" id="religious_sect" name="religious_sect" list="religiousSectList" autocomplete="off" style="font-size:13px;" required>
+                        <datalist id="religiousSectList">
+                            <?php foreach ($religiousSects as $sect): ?>
+                            <option value="<?php echo htmlspecialchars($sect); ?>">
+                            <?php endforeach; ?>
+                        </datalist>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="position" class="form-label mb-1" style="font-size:12px;">Position</label>
+                        <input type="text" class="form-control form-control-sm" id="position" name="position" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-8">
+                        <label for="church_address" class="form-label mb-1" style="font-size:12px;">Church Address</label>
+                        <input type="text" class="form-control form-control-sm" id="church_address" name="church_address" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="contact_number" class="form-label mb-1" style="font-size:12px;">Contact Number</label>
+                        <input type="text" class="form-control form-control-sm" id="contact_number" name="contact_number" style="font-size:13px;">
+                    </div>
+                </div>
 
-                    <input type="hidden" name="id" id="authorityId">
+                <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                    <hr class="flex-grow-1 my-0" style="opacity:.25;">
+                    <div class="d-flex gap-4 flex-shrink-0 px-2">
+                        <div class="form-check m-0">
+                            <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusEncoding" value="encoding">
+                            <label class="form-check-label" for="statusEncoding" style="font-size:12px;font-weight:600;">Encoding</label>
+                        </div>
+                        <div class="form-check m-0">
+                            <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusCompliant" value="compliant">
+                            <label class="form-check-label" for="statusCompliant" style="font-size:12px;font-weight:600;">Compliant</label>
+                        </div>
+                    </div>
+                    <hr class="flex-grow-1 my-0" style="opacity:.25;">
+                </div>
 
+                <div class="row g-2 mb-2">
+                    <div class="col-md-2">
+                        <label for="filed" class="form-label mb-1" style="font-size:12px;">Filed</label>
+                        <input type="date" class="form-control form-control-sm" id="filed" name="filed" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="payment" class="form-label mb-1" style="font-size:12px;">Payment</label>
+                        <input type="date" class="form-control form-control-sm" id="payment" name="payment" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="received_in_rsso" class="form-label mb-1" style="font-size:12px;">Received in RSSO</label>
+                        <input type="date" class="form-control form-control-sm" id="received_in_rsso" name="received_in_rsso" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="processed" class="form-label mb-1" style="font-size:12px;">Processed</label>
+                        <input type="date" class="form-control form-control-sm" id="processed" name="processed" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="approved" class="form-label mb-1" style="font-size:12px;">Approved</label>
+                        <input type="date" class="form-control form-control-sm" id="approved" name="approved" style="font-size:13px;">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="transmitted_to_pso" class="form-label mb-1" style="font-size:12px;">Transmitted to PSO</label>
+                        <input type="date" class="form-control form-control-sm" id="transmitted_to_pso" name="transmitted_to_pso" style="font-size:13px;">
+                    </div>
+                </div>
+
+                <div id="complianceFieldsGroup" style="display:none;">
                     <div class="d-flex align-items-center mb-1">
-                        <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Basic Information</h6>
+                        <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Compliance</h6>
                         <hr class="flex-grow-1 my-0" style="opacity:.15;">
                     </div>
-                    <div class="row g-2 mb-2">
-                        <div class="col-md-3">
-                            <label for="crasm_no" class="form-label mb-1" style="font-size:12px;">CRASM#</label>
-                            <input type="text" class="form-control form-control-sm" id="crasm_no" name="crasm_no" style="font-size:13px;" required>
-                        </div>
-                        <div class="col-md-5">
-                            <label for="name_of_so" class="form-label mb-1" style="font-size:12px;">Name of SO</label>
-                            <input type="text" class="form-control form-control-sm" id="name_of_so" name="name_of_so" style="font-size:13px;" required>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="type" class="form-label mb-1" style="font-size:12px;">Type</label>
-                            <select class="form-select form-select-sm" id="type" name="type" style="font-size:13px;" required>
-                                <option value="">Select</option>
-                                <option value="New">New</option>
-                                <option value="Renewal">Renewal</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="sex" class="form-label mb-1" style="font-size:12px;">Sex</label>
-                            <select class="form-select form-select-sm" id="sex" name="sex" style="font-size:13px;" required>
-                                <option value="">Select</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="provinces" class="form-label mb-1" style="font-size:12px;">Province</label>
-                            <select class="form-select form-select-sm" id="provinces" name="provinces" style="font-size:13px;" required>
-                                <option value="">Select Province</option>
-                                <?php foreach ($provinces as $province): ?>
-                                <option value="<?php echo htmlspecialchars($province); ?>"><?php echo htmlspecialchars($province); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="municipality" class="form-label mb-1" style="font-size:12px;">City/Municipality</label>
-                            <select class="form-select form-select-sm" id="municipality" name="municipality" style="font-size:13px;">
-                                <option value="">Select Province First</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="religious_sect" class="form-label mb-1" style="font-size:12px;">Religious Sect</label>
-                            <input type="text" class="form-control form-control-sm" id="religious_sect" name="religious_sect" list="religiousSectList" autocomplete="off" style="font-size:13px;" required>
-                            <datalist id="religiousSectList">
-                                <?php foreach ($religiousSects as $sect): ?>
-                                <option value="<?php echo htmlspecialchars($sect); ?>">
-                                <?php endforeach; ?>
-                            </datalist>
-                        </div>
-                        <div class="col-md-3">
-                            <label for="position" class="form-label mb-1" style="font-size:12px;">Position</label>
-                            <input type="text" class="form-control form-control-sm" id="position" name="position" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-8">
-                            <label for="church_address" class="form-label mb-1" style="font-size:12px;">Church Address</label>
-                            <input type="text" class="form-control form-control-sm" id="church_address" name="church_address" style="font-size:13px;">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label for="return_to_province_for_compliance" class="form-label mb-1" style="font-size:12px;">Return to Province for Compliance</label>
+                            <input type="date" class="form-control form-control-sm" id="return_to_province_for_compliance" name="return_to_province_for_compliance" style="font-size:13px;">
                         </div>
                         <div class="col-md-4">
-                            <label for="contact_number" class="form-label mb-1" style="font-size:12px;">Contact Number</label>
-                            <input type="text" class="form-control form-control-sm" id="contact_number" name="contact_number" style="font-size:13px;">
+                            <label for="complied" class="form-label mb-1" style="font-size:12px;">Complied</label>
+                            <input type="date" class="form-control form-control-sm" id="complied" name="complied" style="font-size:13px;">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="received_in_rsso_after_compliance" class="form-label mb-1" style="font-size:12px;">Received in RSSO After Compliance</label>
+                            <input type="date" class="form-control form-control-sm" id="received_in_rsso_after_compliance" name="received_in_rsso_after_compliance" style="font-size:13px;">
+                        </div>
+                        <div class="col-12">
+                            <label for="complied_with_the_following" class="form-label mb-1" style="font-size:12px;">Complied with the Following</label>
+                            <textarea class="form-control form-control-sm" id="complied_with_the_following" name="complied_with_the_following" rows="2" style="font-size:13px;"></textarea>
                         </div>
                     </div>
-
-                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
-                        <hr class="flex-grow-1 my-0" style="opacity:.25;">
-                        <div class="d-flex gap-4 flex-shrink-0 px-2">
-                            <div class="form-check m-0">
-                                <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusEncoding" value="encoding">
-                                <label class="form-check-label" for="statusEncoding" style="font-size:12px;font-weight:600;">Encoding</label>
-                            </div>
-                            <div class="form-check m-0">
-                                <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusCompliant" value="compliant">
-                                <label class="form-check-label" for="statusCompliant" style="font-size:12px;font-weight:600;">Compliant</label>
-                            </div>
-                        </div>
-                        <hr class="flex-grow-1 my-0" style="opacity:.25;">
-                    </div>
-
-                    <div class="row g-2 mb-2">
-                        <div class="col-md-2">
-                            <label for="filed" class="form-label mb-1" style="font-size:12px;">Filed</label>
-                            <input type="date" class="form-control form-control-sm" id="filed" name="filed" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="payment" class="form-label mb-1" style="font-size:12px;">Payment</label>
-                            <input type="date" class="form-control form-control-sm" id="payment" name="payment" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="received_in_rsso" class="form-label mb-1" style="font-size:12px;">Received in RSSO</label>
-                            <input type="date" class="form-control form-control-sm" id="received_in_rsso" name="received_in_rsso" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="processed" class="form-label mb-1" style="font-size:12px;">Processed</label>
-                            <input type="date" class="form-control form-control-sm" id="processed" name="processed" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="approved" class="form-label mb-1" style="font-size:12px;">Approved</label>
-                            <input type="date" class="form-control form-control-sm" id="approved" name="approved" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-2">
-                            <label for="transmitted_to_pso" class="form-label mb-1" style="font-size:12px;">Transmitted to PSO</label>
-                            <input type="date" class="form-control form-control-sm" id="transmitted_to_pso" name="transmitted_to_pso" style="font-size:13px;">
-                        </div>
-                    </div>
-
-                    <div id="complianceFieldsGroup" style="display:none;">
-                        <div class="d-flex align-items-center mb-1">
-                            <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Compliance</h6>
-                            <hr class="flex-grow-1 my-0" style="opacity:.15;">
-                        </div>
-                        <div class="row g-2">
-                            <div class="col-md-4">
-                                <label for="return_to_province_for_compliance" class="form-label mb-1" style="font-size:12px;">Return to Province for Compliance</label>
-                                <input type="date" class="form-control form-control-sm" id="return_to_province_for_compliance" name="return_to_province_for_compliance" style="font-size:13px;">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="complied" class="form-label mb-1" style="font-size:12px;">Complied</label>
-                                <input type="date" class="form-control form-control-sm" id="complied" name="complied" style="font-size:13px;">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="received_in_rsso_after_compliance" class="form-label mb-1" style="font-size:12px;">Received in RSSO After Compliance</label>
-                                <input type="date" class="form-control form-control-sm" id="received_in_rsso_after_compliance" name="received_in_rsso_after_compliance" style="font-size:13px;">
-                            </div>
-                            <div class="col-12">
-                                <label for="complied_with_the_following" class="form-label mb-1" style="font-size:12px;">Complied with the Following</label>
-                                <textarea class="form-control form-control-sm" id="complied_with_the_following" name="complied_with_the_following" rows="2" style="font-size:13px;"></textarea>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
-                <div class="modal-footer py-2">
-                    <button type="submit" class="btn btn-sm text-white px-5" style="background-color:#0a1f44;font-size:13px;">Save</button>
-                </div>
-            </form>
-        </div>
+
+            </div>
+            <div class="modal-footer py-2">
+                <button type="submit" class="btn btn-sm text-white px-5" style="background-color:#0a1f44;font-size:13px;">Save</button>
+            </div>
+        </form>
     </div>
 </div>
 

@@ -1,12 +1,5 @@
 <?php
-
-session_start();
-
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
+require_once '../config/session_check.php';
 require_once '../config/database.php';
 
 $adminUsername = $_SESSION['admin_username'] ?? 'Administrator';
@@ -194,7 +187,6 @@ $quarterNewData = array_map(fn($v) => $v['New'], array_values($quarterlyTrend));
 $quarterRenewalData = array_map(fn($v) => $v['Renewal'], array_values($quarterlyTrend));
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

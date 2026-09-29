@@ -1,6 +1,5 @@
 <?php
-session_start();
-if (empty($_SESSION['admin_id'])) { header('Location: ../login.php'); exit; }
+require_once __DIR__ . '/../config/session_check.php';
 if (empty($_SESSION['csrf_token'])) { $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); }
 
 require_once __DIR__ . '/../config/database.php';
