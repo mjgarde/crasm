@@ -1,5 +1,7 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) { session_start(); }
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -12,8 +14,12 @@ if (!function_exists('pm_handle_profile_request')) {
         $dbFile     = __DIR__ . '/../config/database.php';
 
         $respond = function (bool $ok, string $msg, array $extra = []): void {
-            while (ob_get_level() > 0) { ob_end_clean(); }
-            if (!headers_sent()) { header('Content-Type: text/plain; charset=utf-8'); }
+            while (ob_get_level() > 0) {
+                ob_end_clean();
+            }
+            if (!headers_sent()) {
+                header('Content-Type: text/plain; charset=utf-8');
+            }
             echo '@@PMJSON@@' . json_encode(array_merge(['success' => $ok, 'message' => $msg], $extra)) . '@@PMEND@@';
             exit;
         };
@@ -35,9 +41,13 @@ if (!function_exists('pm_handle_profile_request')) {
         }
         $adminId = (int) $_SESSION['admin_id'];
 
-        if (!is_file($dbFile)) { $respond(false, 'DB file not found: ' . $dbFile); }
+        if (!is_file($dbFile)) {
+            $respond(false, 'DB file not found: ' . $dbFile);
+        }
         require_once $dbFile;
-        if (!class_exists('Database')) { $respond(false, 'Class Database not found.'); }
+        if (!class_exists('Database')) {
+            $respond(false, 'Class Database not found.');
+        }
         try {
             $pdo = (new Database())->connect();
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -54,7 +64,9 @@ if (!function_exists('pm_handle_profile_request')) {
                     $st = $pdo->prepare("SELECT name FROM {$adminTable} WHERE id = ?");
                     $st->execute([$adminId]);
                     $row = $st->fetch(PDO::FETCH_ASSOC);
-                    if (!$row) { $respond(false, 'Account not found.'); }
+                    if (!$row) {
+                        $respond(false, 'Account not found.');
+                    }
                     $respond(true, 'OK', ['data' => $row]);
 
                 case 'update_profile':
@@ -70,7 +82,9 @@ if (!function_exists('pm_handle_profile_request')) {
                     $st = $pdo->prepare("SELECT username, password FROM {$adminTable} WHERE id = ?");
                     $st->execute([$adminId]);
                     $me = $st->fetch(PDO::FETCH_ASSOC);
-                    if (!$me) { $respond(false, 'Account not found.'); }
+                    if (!$me) {
+                        $respond(false, 'Account not found.');
+                    }
 
                     if ($wantsNewUsername && $username === $me['username']) {
                         $wantsNewUsername = false;
@@ -89,7 +103,9 @@ if (!function_exists('pm_handle_profile_request')) {
                         }
                         $chk = $pdo->prepare("SELECT id FROM {$adminTable} WHERE username = ? AND id <> ?");
                         $chk->execute([$username, $adminId]);
-                        if ($chk->fetch()) { $respond(false, 'That username is already in use.'); }
+                        if ($chk->fetch()) {
+                            $respond(false, 'That username is already in use.');
+                        }
 
                         $pdo->prepare("UPDATE {$adminTable} SET name = ?, username = ? WHERE id = ?")
                             ->execute([$name, $username, $adminId]);
@@ -152,82 +168,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['pm_action'])) {
 $adminName    = $_SESSION['admin_name'] ?? 'Administrator';
 $adminInitial = strtoupper(substr($adminName, 0, 1));
 $csrfToken    = $_SESSION['csrf_token'];
+$currentPage  = basename($_SERVER['SCRIPT_NAME']);
+
+$navItems = [
+    ['file' => 'dashboard.php', 'label' => 'Dashboard',          'icon' => 'fa-gauge-high'],
+    ['file' => 'authority.php', 'label' => 'Authority',          'icon' => 'fa-user-shield'],
+    ['file' => 'reports.php',   'label' => 'Reports',            'icon' => 'fa-chart-column'],
+    ['file' => 'users.php',     'label' => 'Users',              'icon' => 'fa-users'],
+    ['file' => 'backup.php',    'label' => 'Backup & Recovery',  'icon' => 'fa-database'],
+];
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<nav
-    class="navbar navbar-expand-lg crasm-navbar"
-    style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background-color:#002d62;"
->
+<nav class="navbar navbar-expand-lg crasm-navbar" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background-color:#002d62;">
     <div class="container-fluid px-3">
 
         <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
-            <img src="../assets/img/logo.png" alt="Seal"
-                 style="width:32px;height:32px;object-fit:contain;flex-shrink:0;" class="me-2">
-            <div>
-                <div class="fw-bold text-white" style="font-size:12px;white-space:nowrap;line-height:1.1;">
-                    PHILIPPINE STATISTICS AUTHORITY XII
-                </div>
-                <div style="font-size:9px;white-space:nowrap;color:rgba(255,255,255,.7);">
-                    Certificate of Registration of Authority to Solemnize Marriage
-                </div>
+            <img src="../assets/img/logo.png" alt="Seal" class="me-2" style="width:32px;height:32px;object-fit:contain;flex-shrink:0;">
+            <div class="min-w-0">
+                <div class="fw-bold text-white brand-title">PHILIPPINE STATISTICS AUTHORITY XII</div>
+                <div class="brand-sub">Certificate of Registration of Authority to Solemnize Marriage</div>
             </div>
         </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#crasmNavbarCollapse" aria-controls="crasmNavbarCollapse"
-                aria-expanded="false" aria-label="Toggle navigation"
-                style="font-size:12px;padding:.25rem .5rem;border-color:rgba(255,255,255,.5);">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#crasmNavbarCollapse" aria-controls="crasmNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation" style="font-size:12px;padding:.25rem .5rem;border-color:rgba(255,255,255,.5);">
             <span class="navbar-toggler-icon" style="filter:invert(1);"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="crasmNavbarCollapse">
 
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0" style="font-size:12px;">
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="dashboard.php" title="Dashboard">
-                        <i class="fa-solid fa-gauge-high" style="width:16px;font-size:12px;flex-shrink:0;"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center"><span style="color:rgba(255,255,255,.3);">|</span></li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="authority.php" title="Authority">
-                        <i class="fa-solid fa-user-shield" style="width:16px;font-size:12px;flex-shrink:0;"></i> Authority
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center"><span style="color:rgba(255,255,255,.3);">|</span></li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="reports.php" title="Reports">
-                        <i class="fa-solid fa-chart-column" style="width:16px;font-size:12px;flex-shrink:0;"></i> Reports
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center"><span style="color:rgba(255,255,255,.3);">|</span></li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="users.php" title="Users">
-                        <i class="fa-solid fa-users" style="width:16px;font-size:12px;flex-shrink:0;"></i> Users
-                    </a>
-                </li>
-                <li class="nav-item d-flex align-items-center"><span style="color:rgba(255,255,255,.3);">|</span></li>
-                <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="backup.php" title="Backup &amp; Recovery">
-                        <i class="fa-solid fa-database" style="width:16px;font-size:12px;flex-shrink:0;"></i> Backup &amp; Recovery
-                    </a>
-                </li>
+                <?php foreach ($navItems as $i => $item): ?>
+                    <?php if ($i > 0): ?>
+                    <li class="nav-item d-none d-lg-flex align-items-center">
+                        <span style="color:rgba(255,255,255,.3);">|</span>
+                    </li>
+                    <?php endif; ?>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-1<?= $currentPage === $item['file'] ? ' is-current' : '' ?>"
+                           href="<?= $item['file'] ?>"
+                           title="<?= htmlspecialchars($item['label']) ?>"
+                           <?= $currentPage === $item['file'] ? 'aria-current="page"' : '' ?>>
+                            <i class="fa-solid <?= $item['icon'] ?>" style="width:16px;font-size:12px;flex-shrink:0;"></i>
+                            <?= htmlspecialchars($item['label']) ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
             </ul>
 
             <ul class="navbar-nav mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center justify-content-center"
-                       href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:12px;">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:12px;">
                         <i class="fa-solid fa-circle-user" style="font-size:20px;"></i>
+                        <span class="d-lg-none">Account</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 p-0 overflow-hidden" style="font-size:12px;min-width:220px;">
                         <li class="d-flex align-items-center gap-2 px-3 py-3" style="background-color:#f8f9fa;">
-                            <span id="navAvatar"
-                                  class="d-inline-flex align-items-center justify-content-center rounded-circle text-white fw-semibold flex-shrink-0"
-                                  style="width:36px;height:36px;font-size:14px;background-color:#002d62;">
+                            <span id="navAvatar" class="d-inline-flex align-items-center justify-content-center rounded-circle text-white fw-semibold flex-shrink-0" style="width:36px;height:36px;font-size:14px;background-color:#002d62;">
                                 <?= htmlspecialchars($adminInitial) ?>
                             </span>
                             <div class="text-truncate">
@@ -238,8 +237,7 @@ $csrfToken    = $_SESSION['csrf_token'];
                             </div>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center gap-2 px-3 py-2" href="#"
-                               data-bs-toggle="modal" data-bs-target="#profileModal">
+                            <a class="dropdown-item d-flex align-items-center gap-2 px-3 py-2" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">
                                 <i class="fa-solid fa-user-pen" style="width:14px;"></i> My Profile
                             </a>
                         </li>
@@ -261,17 +259,13 @@ $csrfToken    = $_SESSION['csrf_token'];
 <div style="height:4px;background-color:#d4a017;"></div>
 <div style="height:4px;background-color:#a3202f;"></div>
 
-<!-- ===================== PROFILE MODAL ===================== -->
-<div class="modal fade crasm-profile" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true"
-     style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<div class="modal fade crasm-profile" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true" style="font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
     <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
         <div class="modal-content border-0 shadow">
 
             <div class="modal-header border-0 text-white" style="background-color:#002d62;">
                 <div class="d-flex align-items-center gap-3">
-                    <span id="pmAvatar"
-                          class="d-inline-flex align-items-center justify-content-center rounded-circle fw-semibold"
-                          style="width:44px;height:44px;font-size:18px;background:#d4a017;color:#002d62;">
+                    <span id="pmAvatar" class="d-inline-flex align-items-center justify-content-center rounded-circle fw-semibold" style="width:44px;height:44px;font-size:18px;background:#d4a017;color:#002d62;">
                         <?= htmlspecialchars($adminInitial) ?>
                     </span>
                     <div>
@@ -301,7 +295,6 @@ $csrfToken    = $_SESSION['csrf_token'];
 
                 <div class="tab-content">
 
-                    <!-- Account Info -->
                     <div class="tab-pane fade show active" id="pmTabInfo" role="tabpanel">
                         <form id="pmInfoForm" novalidate autocomplete="off">
                             <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
@@ -330,7 +323,6 @@ $csrfToken    = $_SESSION['csrf_token'];
                         </form>
                     </div>
 
-                    <!-- Change Password -->
                     <div class="tab-pane fade" id="pmTabPass" role="tabpanel">
                         <form id="pmPassForm" novalidate autocomplete="off">
                             <input type="hidden" name="csrf_token" value="<?= $csrfToken ?>">
@@ -373,12 +365,91 @@ $csrfToken    = $_SESSION['csrf_token'];
 </div>
 
 <style>
-    .crasm-navbar .nav-link { color: rgba(255,255,255,.75); padding: .5rem .65rem; transition: color .15s ease; }
-    .crasm-navbar .nav-link:hover { color:
-    .crasm-navbar .dropdown-toggle::after { display: none; }
-    .crasm-profile .nav-tabs .nav-link { color:
-    .crasm-profile .nav-tabs .nav-link.active { color:
-    .crasm-profile .form-control:focus { border-color:
+    .crasm-navbar .nav-link {
+        color: rgba(255, 255, 255, .75);
+        padding: .5rem .65rem;
+        transition: color .15s ease;
+    }
+
+    .crasm-navbar .nav-link:hover {
+        color: #fff;
+    }
+
+    .crasm-navbar .dropdown-toggle::after {
+        display: none;
+    }
+
+    .crasm-navbar .brand-title {
+        font-size: 12px;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+
+    .crasm-navbar .brand-sub {
+        font-size: 9px;
+        white-space: nowrap;
+        color: rgba(255, 255, 255, .7);
+    }
+
+    @media (max-width: 991.98px) {
+        .crasm-navbar .navbar-brand {
+            min-width: 0;
+            max-width: calc(100% - 60px);
+            margin-right: 0;
+        }
+
+        .crasm-navbar .navbar-brand .min-w-0 {
+            min-width: 0;
+        }
+
+        .crasm-navbar .brand-sub {
+            display: none;
+        }
+
+        .crasm-navbar .brand-title {
+            font-size: 11px;
+            line-height: 1.15;
+            white-space: normal;
+        }
+
+        .crasm-navbar .navbar-collapse {
+            margin-top: .5rem;
+        }
+
+        .crasm-navbar .collapsing {
+            transition: none;
+        }
+
+        .crasm-navbar .navbar-nav .nav-link {
+            font-size: 14px;
+            padding: .7rem .25rem;
+            border-top: 1px solid rgba(255, 255, 255, .12);
+            transition: none;
+        }
+
+        .crasm-navbar .navbar-nav .nav-link i {
+            font-size: 14px;
+        }
+
+        .crasm-navbar .navbar-nav .nav-link.is-current {
+            color: #fff;
+            font-weight: 600;
+        }
+    }
+
+    .crasm-profile .nav-tabs .nav-link {
+        color: #555;
+    }
+
+    .crasm-profile .nav-tabs .nav-link.active {
+        color: #002d62;
+        font-weight: 600;
+    }
+
+    .crasm-profile .form-control:focus {
+        border-color: #002d62;
+        box-shadow: 0 0 0 .2rem rgba(0, 45, 98, .15);
+    }
 </style>
 
 <script>
@@ -394,21 +465,36 @@ $csrfToken    = $_SESSION['csrf_token'];
         alertBox.className = 'alert py-2 px-3 mb-3 alert-' + type;
         alertBox.textContent = msg;
     }
-    function hideAlert() { alertBox.className = 'alert d-none'; }
+
+    function hideAlert() {
+        alertBox.className = 'alert d-none';
+    }
 
     const MASK = '********';
     const usernameInput = document.getElementById('pmUsername');
     const infoPassGroup = document.getElementById('pmInfoPassGroup');
     const infoPass      = document.getElementById('pmInfoPass');
+
     function syncUsernamePass() {
         const v = usernameInput.value.trim();
         const changed = v !== '' && v !== MASK;
         infoPassGroup.classList.toggle('d-none', !changed);
-        if (!changed) { infoPass.value = ''; }
+        if (!changed) {
+            infoPass.value = '';
+        }
     }
-    function resetUsernameMask() { usernameInput.value = MASK; syncUsernamePass(); }
-    usernameInput.addEventListener('focus', () => { if (usernameInput.value === MASK) usernameInput.value = ''; });
-    usernameInput.addEventListener('blur',  () => { if (usernameInput.value.trim() === '') resetUsernameMask(); });
+
+    function resetUsernameMask() {
+        usernameInput.value = MASK;
+        syncUsernamePass();
+    }
+
+    usernameInput.addEventListener('focus', () => {
+        if (usernameInput.value === MASK) usernameInput.value = '';
+    });
+    usernameInput.addEventListener('blur', () => {
+        if (usernameInput.value.trim() === '') resetUsernameMask();
+    });
     usernameInput.addEventListener('input', syncUsernamePass);
 
     async function post(formData) {
@@ -416,11 +502,15 @@ $csrfToken    = $_SESSION['csrf_token'];
         const raw = await res.text();
         const m = raw.match(/@@PMJSON@@([\s\S]*?)@@PMEND@@/);
         let json;
-        try { json = JSON.parse(m[1]); } catch (e) {
+        try {
+            json = JSON.parse(m[1]);
+        } catch (e) {
             console.error('Profile request failed (HTTP ' + res.status + '):', raw);
             json = { success: false, message: 'Unexpected server response (HTTP ' + res.status + '). Check browser console.' };
         }
-        if (json.expired) { window.location.href = '../login.php'; }
+        if (json.expired) {
+            window.location.href = '../login.php';
+        }
         return json;
     }
 
@@ -438,7 +528,7 @@ $csrfToken    = $_SESSION['csrf_token'];
         fd.append('pm_action', 'get');
         const r = await post(fd);
         if (r.success) {
-            document.getElementById('pmName').value     = r.data.name;
+            document.getElementById('pmName').value = r.data.name;
             resetUsernameMask();
         } else {
             showAlert('danger', r.message);
@@ -467,7 +557,9 @@ $csrfToken    = $_SESSION['csrf_token'];
         const r = await post(new FormData(passForm));
         setLoading(passForm, false);
         showAlert(r.success ? 'success' : 'danger', r.message);
-        if (r.success) { passForm.reset(); }
+        if (r.success) {
+            passForm.reset();
+        }
     });
 
     document.querySelectorAll('.pm-toggle').forEach(btn => {
@@ -478,6 +570,5 @@ $csrfToken    = $_SESSION['csrf_token'];
             btn.innerHTML = '<i class="fa-solid ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
         });
     });
-
 })();
 </script>
