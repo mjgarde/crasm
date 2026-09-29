@@ -2,8 +2,16 @@
 session_start();
 require_once 'config/database.php';
 
+$adminHome = 'admin/dashboard.php';
+$userHome  = 'user/dashboard.php';
+
 if (isset($_SESSION['admin_id'])) {
-    header('Location: admin/dashboard.php');
+    header('Location: ' . $adminHome);
+    exit;
+}
+
+if (isset($_SESSION['user_id'])) {
+    header('Location: ' . $userHome);
     exit;
 }
 
@@ -25,10 +33,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($admin && password_verify($password, $admin['password'])) {
             session_regenerate_id(true);
+            unset($_SESSION['user_id'], $_SESSION['user_username'], $_SESSION['user_name']);
+            $_SESSION['role'] = 'admin';
             $_SESSION['admin_id'] = $admin['id'];
             $_SESSION['admin_username'] = $admin['username'];
             $_SESSION['admin_name'] = $admin['name'] ?? $admin['username'];
-            header('Location: admin/dashboard.php');
+            header('Location: ' . $adminHome);
+            exit;
+        }
+
+        $user = false;
+        try {
+            $stmt = $pdo->prepare("SELECT id, username, name, password FROM users WHERE username = ? LIMIT 1");
+            $stmt->execute([$username]);
+            $user = $stmt->fetch();
+        } catch (Throwable $e) {
+            $user = false;
+        }
+
+        if ($user && password_verify($password, $user['password'])) {
+            session_regenerate_id(true);
+            unset($_SESSION['admin_id'], $_SESSION['admin_username'], $_SESSION['admin_name']);
+            $_SESSION['role'] = 'user';
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_username'] = $user['username'];
+            $_SESSION['user_name'] = $user['name'] ?? $user['username'];
+            header('Location: ' . $userHome);
             exit;
         }
 
@@ -109,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form method="POST" novalidate>
                         <div class="mb-2">
                             <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" required autofocus>
+                            <input type="text" class="form-control" id="username" name="username" placeholder="Enter username" value="<?= htmlspecialchars($username ?? '') ?>" required autofocus>
                         </div>
 
                         <div class="mb-2">
