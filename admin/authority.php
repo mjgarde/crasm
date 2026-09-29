@@ -303,18 +303,37 @@ $months = [
 
                     <input type="hidden" name="id" id="authorityId">
 
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size:.6rem;letter-spacing:.05em;">Basic Information</h6>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-4">
-                            <label for="crasm_no" class="form-label mb-1" style="font-size:13px;">CRASM#</label>
+                    <div class="d-flex align-items-center mb-1">
+                        <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Basic Information</h6>
+                        <hr class="flex-grow-1 my-0" style="opacity:.15;">
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-3">
+                            <label for="crasm_no" class="form-label mb-1" style="font-size:12px;">CRASM#</label>
                             <input type="text" class="form-control form-control-sm" id="crasm_no" name="crasm_no" style="font-size:13px;" required>
                         </div>
-                        <div class="col-md-8">
-                            <label for="name_of_so" class="form-label mb-1" style="font-size:13px;">Name of SO</label>
+                        <div class="col-md-5">
+                            <label for="name_of_so" class="form-label mb-1" style="font-size:12px;">Name of SO</label>
                             <input type="text" class="form-control form-control-sm" id="name_of_so" name="name_of_so" style="font-size:13px;" required>
                         </div>
-                        <div class="col-md-4">
-                            <label for="provinces" class="form-label mb-1" style="font-size:13px;">Province</label>
+                        <div class="col-md-2">
+                            <label for="type" class="form-label mb-1" style="font-size:12px;">Type</label>
+                            <select class="form-select form-select-sm" id="type" name="type" style="font-size:13px;" required>
+                                <option value="">Select</option>
+                                <option value="New">New</option>
+                                <option value="Renewal">Renewal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sex" class="form-label mb-1" style="font-size:12px;">Sex</label>
+                            <select class="form-select form-select-sm" id="sex" name="sex" style="font-size:13px;" required>
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="provinces" class="form-label mb-1" style="font-size:12px;">Province</label>
                             <select class="form-select form-select-sm" id="provinces" name="provinces" style="font-size:13px;" required>
                                 <option value="">Select Province</option>
                                 <?php foreach ($provinces as $province): ?>
@@ -322,30 +341,14 @@ $months = [
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="municipality" class="form-label mb-1" style="font-size:13px;">City/Municipality</label>
+                        <div class="col-md-3">
+                            <label for="municipality" class="form-label mb-1" style="font-size:12px;">City/Municipality</label>
                             <select class="form-select form-select-sm" id="municipality" name="municipality" style="font-size:13px;">
                                 <option value="">Select Province First</option>
                             </select>
                         </div>
-                        <div class="col-md-4">
-                            <label for="type" class="form-label mb-1" style="font-size:13px;">Type</label>
-                            <select class="form-select form-select-sm" id="type" name="type" style="font-size:13px;" required>
-                                <option value="">Select Type</option>
-                                <option value="New">New</option>
-                                <option value="Renewal">Renewal</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="sex" class="form-label mb-1" style="font-size:13px;">Sex</label>
-                            <select class="form-select form-select-sm" id="sex" name="sex" style="font-size:13px;" required>
-                                <option value="">Select Sex</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="religious_sect" class="form-label mb-1" style="font-size:13px;">Religious Sect</label>
+                        <div class="col-md-3">
+                            <label for="religious_sect" class="form-label mb-1" style="font-size:12px;">Religious Sect</label>
                             <input type="text" class="form-control form-control-sm" id="religious_sect" name="religious_sect" list="religiousSectList" autocomplete="off" style="font-size:13px;" required>
                             <datalist id="religiousSectList">
                                 <?php foreach ($religiousSects as $sect): ?>
@@ -353,86 +356,90 @@ $months = [
                                 <?php endforeach; ?>
                             </datalist>
                         </div>
-                        <div class="col-md-4">
-                            <label for="position" class="form-label mb-1" style="font-size:13px;">Position</label>
+                        <div class="col-md-3">
+                            <label for="position" class="form-label mb-1" style="font-size:12px;">Position</label>
                             <input type="text" class="form-control form-control-sm" id="position" name="position" style="font-size:13px;">
                         </div>
-                    </div>
-
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size:.6rem;letter-spacing:.05em;">Contact Information</h6>
-                    <div class="row g-2 mb-3">
                         <div class="col-md-8">
-                            <label for="church_address" class="form-label mb-1" style="font-size:13px;">Church Address</label>
+                            <label for="church_address" class="form-label mb-1" style="font-size:12px;">Church Address</label>
                             <input type="text" class="form-control form-control-sm" id="church_address" name="church_address" style="font-size:13px;">
                         </div>
                         <div class="col-md-4">
-                            <label for="contact_number" class="form-label mb-1" style="font-size:13px;">Contact Number</label>
+                            <label for="contact_number" class="form-label mb-1" style="font-size:12px;">Contact Number</label>
                             <input type="text" class="form-control form-control-sm" id="contact_number" name="contact_number" style="font-size:13px;">
                         </div>
                     </div>
 
-                    <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size:.6rem;letter-spacing:.05em;">Processing Timeline</h6>
-
-                    <div class="mb-2 d-flex gap-3">
-                        <div class="form-check">
-                            <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusEncoding" value="encoding">
-                            <label class="form-check-label" for="statusEncoding" style="font-size:13px;">Encoding</label>
+                    <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                        <hr class="flex-grow-1 my-0" style="opacity:.25;">
+                        <div class="d-flex gap-4 flex-shrink-0 px-2">
+                            <div class="form-check m-0">
+                                <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusEncoding" value="encoding">
+                                <label class="form-check-label" for="statusEncoding" style="font-size:12px;font-weight:600;">Encoding</label>
+                            </div>
+                            <div class="form-check m-0">
+                                <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusCompliant" value="compliant">
+                                <label class="form-check-label" for="statusCompliant" style="font-size:12px;font-weight:600;">Compliant</label>
+                            </div>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input status-toggle" type="radio" name="status_type" id="statusCompliant" value="compliant">
-                            <label class="form-check-label" for="statusCompliant" style="font-size:13px;">Compliant</label>
-                        </div>
+                        <hr class="flex-grow-1 my-0" style="opacity:.25;">
                     </div>
 
-                    <div class="row g-2">
+                    <div class="row g-2 mb-2">
                         <div class="col-md-2">
-                            <label for="filed" class="form-label mb-1" style="font-size:13px;">Filed</label>
+                            <label for="filed" class="form-label mb-1" style="font-size:12px;">Filed</label>
                             <input type="date" class="form-control form-control-sm" id="filed" name="filed" style="font-size:13px;">
                         </div>
                         <div class="col-md-2">
-                            <label for="payment" class="form-label mb-1" style="font-size:13px;">Payment</label>
+                            <label for="payment" class="form-label mb-1" style="font-size:12px;">Payment</label>
                             <input type="date" class="form-control form-control-sm" id="payment" name="payment" style="font-size:13px;">
                         </div>
                         <div class="col-md-2">
-                            <label for="received_in_rsso" class="form-label mb-1" style="font-size:13px;">Received in RSSO</label>
+                            <label for="received_in_rsso" class="form-label mb-1" style="font-size:12px;">Received in RSSO</label>
                             <input type="date" class="form-control form-control-sm" id="received_in_rsso" name="received_in_rsso" style="font-size:13px;">
                         </div>
                         <div class="col-md-2">
-                            <label for="processed" class="form-label mb-1" style="font-size:13px;">Processed</label>
+                            <label for="processed" class="form-label mb-1" style="font-size:12px;">Processed</label>
                             <input type="date" class="form-control form-control-sm" id="processed" name="processed" style="font-size:13px;">
                         </div>
                         <div class="col-md-2">
-                            <label for="approved" class="form-label mb-1" style="font-size:13px;">Approved</label>
+                            <label for="approved" class="form-label mb-1" style="font-size:12px;">Approved</label>
                             <input type="date" class="form-control form-control-sm" id="approved" name="approved" style="font-size:13px;">
                         </div>
                         <div class="col-md-2">
-                            <label for="transmitted_to_pso" class="form-label mb-1" style="font-size:13px;">Transmitted to PSO</label>
+                            <label for="transmitted_to_pso" class="form-label mb-1" style="font-size:12px;">Transmitted to PSO</label>
                             <input type="date" class="form-control form-control-sm" id="transmitted_to_pso" name="transmitted_to_pso" style="font-size:13px;">
                         </div>
                     </div>
 
-                    <div id="complianceFieldsGroup" class="row g-2 mt-1" style="display:none;">
-                        <div class="col-12">
-                            <hr class="my-2">
-                            <h6 class="fw-bold text-uppercase text-muted mb-2" style="font-size:.6rem;letter-spacing:.05em;">Compliance</h6>
+                    <div id="complianceFieldsGroup" style="display:none;">
+                        <div class="d-flex align-items-center mb-1">
+                            <h6 class="fw-bold text-uppercase text-muted mb-0 me-2" style="font-size:.6rem;letter-spacing:.05em;">Compliance</h6>
+                            <hr class="flex-grow-1 my-0" style="opacity:.15;">
                         </div>
-                        <div class="col-md-4">
-                            <label for="return_to_province_for_compliance" class="form-label mb-1" style="font-size:13px;">Return to Province for Compliance</label>
-                            <input type="date" class="form-control form-control-sm" id="return_to_province_for_compliance" name="return_to_province_for_compliance" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="complied" class="form-label mb-1" style="font-size:13px;">Complied</label>
-                            <input type="date" class="form-control form-control-sm" id="complied" name="complied" style="font-size:13px;">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="received_in_rsso_after_compliance" class="form-label mb-1" style="font-size:13px;">Received in RSSO After Compliance</label>
-                            <input type="date" class="form-control form-control-sm" id="received_in_rsso_after_compliance" name="received_in_rsso_after_compliance" style="font-size:13px;">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label for="return_to_province_for_compliance" class="form-label mb-1" style="font-size:12px;">Return to Province for Compliance</label>
+                                <input type="date" class="form-control form-control-sm" id="return_to_province_for_compliance" name="return_to_province_for_compliance" style="font-size:13px;">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="complied" class="form-label mb-1" style="font-size:12px;">Complied</label>
+                                <input type="date" class="form-control form-control-sm" id="complied" name="complied" style="font-size:13px;">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="received_in_rsso_after_compliance" class="form-label mb-1" style="font-size:12px;">Received in RSSO After Compliance</label>
+                                <input type="date" class="form-control form-control-sm" id="received_in_rsso_after_compliance" name="received_in_rsso_after_compliance" style="font-size:13px;">
+                            </div>
+                            <div class="col-12">
+                                <label for="complied_with_the_following" class="form-label mb-1" style="font-size:12px;">Complied with the Following</label>
+                                <textarea class="form-control form-control-sm" id="complied_with_the_following" name="complied_with_the_following" rows="2" style="font-size:13px;"></textarea>
+                            </div>
                         </div>
                     </div>
 
                 </div>
                 <div class="modal-footer py-2">
-                    <button type="submit" class="btn btn-sm text-white" style="background-color:#0a1f44;font-size:13px;">Save</button>
+                    <button type="submit" class="btn btn-sm text-white px-5" style="background-color:#0a1f44;font-size:13px;">Save</button>
                 </div>
             </form>
         </div>
@@ -914,8 +921,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const compliantChecked = document.getElementById('statusCompliant').checked;
         complianceFieldsGroup.style.display = compliantChecked ? '' : 'none';
         if (!compliantChecked) {
-            complianceFieldsGroup.querySelectorAll('input').forEach(function (input) {
-                input.value = '';
+            complianceFieldsGroup.querySelectorAll('input, textarea').forEach(function (field) {
+                field.value = '';
             });
         }
     }
