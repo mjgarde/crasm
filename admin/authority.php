@@ -53,6 +53,184 @@ $months = [
         height: 100vh;
         height: 100dvh;
     }
+
+    .authority-table .c-appr .text-muted {
+        font-weight: 400;
+    }
+
+    @media (max-width: 767.98px) {
+        .filter-card .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+        }
+
+        .filter-card .filter-bar > * {
+            flex: 1 1 calc(50% - .25rem);
+            min-width: 0;
+        }
+
+        .filter-card .filter-bar .search-wrap {
+            flex: 1 1 100%;
+            width: 100%;
+            max-width: none;
+        }
+
+        .filter-card .filter-bar .filter-sort-select {
+            width: auto;
+            max-width: none;
+        }
+
+        .filter-card .filter-panel {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: auto;
+            width: auto;
+            max-width: none;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: #fff;
+            border-radius: 14px 14px 0 0;
+            box-shadow: 0 -8px 28px rgba(10, 31, 68, .22);
+            z-index: 1045;
+            padding: 1rem;
+        }
+
+        .filter-card .filter-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: .75rem;
+        }
+
+        .filter-card .date-range-group {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .filter-card .date-range-group .form-control {
+            min-width: 0;
+            flex: 1 1 0;
+        }
+
+        .filter-card .filter-panel select,
+        .filter-card .filter-panel input {
+            font-size: 16px;
+        }
+
+        #addAuthorityModal .form-control,
+        #addAuthorityModal .form-select {
+            font-size: 16px !important;
+        }
+
+        #addAuthorityModal .modal-footer .btn-save {
+            width: 100%;
+            padding-top: .55rem;
+            padding-bottom: .55rem;
+        }
+
+        #authorityTableWrapper {
+            overflow: visible;
+        }
+
+        .authority-table {
+            font-size: 12px !important;
+        }
+
+        .authority-table thead {
+            display: none;
+        }
+
+        .authority-table,
+        .authority-table tbody {
+            display: block;
+        }
+
+        .authority-table tbody tr {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: .4rem .75rem;
+            padding: .9rem 1rem;
+            border-bottom: 1px solid #e3e8ef;
+        }
+
+        .authority-table tbody td {
+            display: block;
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .authority-table td.c-no,
+        .authority-table td.c-sect,
+        .authority-table td.c-sex,
+        .authority-table td.c-addr,
+        .authority-table td.c-contact,
+        .authority-table td.c-pos {
+            display: none;
+        }
+
+        .authority-table td.c-name {
+            grid-column: 1;
+            grid-row: 1;
+            font-size: 14px;
+            font-weight: 600;
+            min-width: 0;
+            word-break: break-word;
+        }
+
+        .authority-table td.c-act {
+            grid-column: 2;
+            grid-row: 1;
+            text-align: right;
+        }
+
+        .authority-table td.c-act .btn {
+            width: 38px;
+            height: 34px;
+        }
+
+        .authority-table td.c-crasm {
+            grid-row: 2;
+        }
+
+        .authority-table td.c-crasm,
+        .authority-table td.c-prov,
+        .authority-table td.c-type,
+        .authority-table td.c-appr {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .authority-table td.c-crasm::before,
+        .authority-table td.c-prov::before,
+        .authority-table td.c-type::before,
+        .authority-table td.c-appr::before {
+            content: attr(data-label);
+            color: #6b7688;
+            flex-shrink: 0;
+        }
+
+        .authority-table tbody tr.authority-empty td {
+            grid-column: 1 / -1;
+            text-align: center;
+        }
+
+        #paginationControls {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .authority-footer {
+            justify-content: center !important;
+            text-align: center;
+        }
+    }
 </style>
 </head>
 
@@ -204,7 +382,7 @@ $months = [
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive" id="authorityTableWrapper">
-                    <table class="table table-hover align-middle mb-0" id="authorityTable" style="font-size:11px;">
+                    <table class="table table-hover align-middle mb-0 authority-table" id="authorityTable" style="font-size:11px;">
                         <thead class="table-light">
                             <tr>
                                 <th>No.</th>
@@ -236,20 +414,20 @@ $months = [
                                 data-date="<?php echo htmlspecialchars($record['approved'] ?? ''); ?>"
                                 data-record="<?php echo htmlspecialchars(json_encode($record), ENT_QUOTES); ?>"
                             >
-                                <td><?php echo htmlspecialchars($record['no']); ?></td>
-                                <td><?php echo htmlspecialchars($record['crasm_no']); ?></td>
-                                <td><?php echo htmlspecialchars($record['name_of_so']); ?></td>
-                                <td><?php echo htmlspecialchars($record['provinces']); ?></td>
-                                <td><?php echo htmlspecialchars($record['type']); ?></td>
-                                <td><?php echo htmlspecialchars($record['religious_sect']); ?></td>
-                                <td><?php echo htmlspecialchars($record['sex']); ?></td>
-                                <td><?php echo htmlspecialchars($record['church_address']); ?></td>
-                                <td><?php echo htmlspecialchars($record['contact_number']); ?></td>
-                                <td><?php echo htmlspecialchars($record['position']); ?></td>
-                                <td><?php echo $record['approved'] ? htmlspecialchars(date('M d, Y', strtotime($record['approved']))) : '<span class="text-muted">—</span>'; ?></td>
-                                <td class="text-center">
+                                <td class="c-no"><?php echo htmlspecialchars($record['no']); ?></td>
+                                <td class="c-crasm" data-label="CRASM#"><span><?php echo htmlspecialchars($record['crasm_no']); ?></span></td>
+                                <td class="c-name"><?php echo htmlspecialchars($record['name_of_so']); ?></td>
+                                <td class="c-prov" data-label="Province"><span><?php echo htmlspecialchars($record['provinces']); ?></span></td>
+                                <td class="c-type" data-label="Type"><span><?php echo htmlspecialchars($record['type']); ?></span></td>
+                                <td class="c-sect"><?php echo htmlspecialchars($record['religious_sect']); ?></td>
+                                <td class="c-sex"><?php echo htmlspecialchars($record['sex']); ?></td>
+                                <td class="c-addr"><?php echo htmlspecialchars($record['church_address']); ?></td>
+                                <td class="c-contact"><?php echo htmlspecialchars($record['contact_number']); ?></td>
+                                <td class="c-pos"><?php echo htmlspecialchars($record['position']); ?></td>
+                                <td class="c-appr" data-label="Approved"><span><?php echo $record['approved'] ? htmlspecialchars(date('M d, Y', strtotime($record['approved']))) : '<span class="text-muted">—</span>'; ?></span></td>
+                                <td class="c-act text-center">
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-popper-config='{"strategy":"fixed"}' aria-label="Actions">
                                             <i class="fa-solid fa-ellipsis-vertical"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
@@ -270,7 +448,7 @@ $months = [
                             </tr>
                             <?php endforeach; ?>
                             <?php if (empty($authorityRecords)): ?>
-                            <tr>
+                            <tr class="authority-empty">
                                 <td colspan="12" class="text-center text-muted py-4">No authority records found.</td>
                             </tr>
                             <?php endif; ?>
@@ -278,7 +456,7 @@ $months = [
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center flex-wrap gap-2 authority-footer">
                 <span class="text-muted small" id="paginationInfo">Showing records</span>
                 <nav>
                     <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
@@ -306,15 +484,15 @@ $months = [
                     <hr class="flex-grow-1 my-0" style="opacity:.15;">
                 </div>
                 <div class="row g-2 mb-2">
-                    <div class="col-md-3">
+                    <div class="col-12 col-md-3">
                         <label for="crasm_no" class="form-label mb-1" style="font-size:12px;">CRASM#</label>
                         <input type="text" class="form-control form-control-sm" id="crasm_no" name="crasm_no" style="font-size:13px;" required>
                     </div>
-                    <div class="col-md-5">
+                    <div class="col-12 col-md-5">
                         <label for="name_of_so" class="form-label mb-1" style="font-size:12px;">Name of SO</label>
                         <input type="text" class="form-control form-control-sm" id="name_of_so" name="name_of_so" style="font-size:13px;" required>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="type" class="form-label mb-1" style="font-size:12px;">Type</label>
                         <select class="form-select form-select-sm" id="type" name="type" style="font-size:13px;" required>
                             <option value="">Select</option>
@@ -322,7 +500,7 @@ $months = [
                             <option value="Renewal">Renewal</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="sex" class="form-label mb-1" style="font-size:12px;">Sex</label>
                         <select class="form-select form-select-sm" id="sex" name="sex" style="font-size:13px;" required>
                             <option value="">Select</option>
@@ -330,7 +508,7 @@ $months = [
                             <option value="Female">Female</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label for="provinces" class="form-label mb-1" style="font-size:12px;">Province</label>
                         <select class="form-select form-select-sm" id="provinces" name="provinces" style="font-size:13px;" required>
                             <option value="">Select Province</option>
@@ -339,13 +517,13 @@ $months = [
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label for="municipality" class="form-label mb-1" style="font-size:12px;">City/Municipality</label>
                         <select class="form-select form-select-sm" id="municipality" name="municipality" style="font-size:13px;">
                             <option value="">Select Province First</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label for="religious_sect" class="form-label mb-1" style="font-size:12px;">Religious Sect</label>
                         <input type="text" class="form-control form-control-sm" id="religious_sect" name="religious_sect" list="religiousSectList" autocomplete="off" style="font-size:13px;" required>
                         <datalist id="religiousSectList">
@@ -354,17 +532,17 @@ $months = [
                             <?php endforeach; ?>
                         </datalist>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label for="position" class="form-label mb-1" style="font-size:12px;">Position</label>
                         <input type="text" class="form-control form-control-sm" id="position" name="position" style="font-size:13px;">
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <label for="church_address" class="form-label mb-1" style="font-size:12px;">Church Address</label>
                         <input type="text" class="form-control form-control-sm" id="church_address" name="church_address" style="font-size:13px;">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label for="contact_number" class="form-label mb-1" style="font-size:12px;">Contact Number</label>
-                        <input type="text" class="form-control form-control-sm" id="contact_number" name="contact_number" style="font-size:13px;">
+                        <input type="text" class="form-control form-control-sm" id="contact_number" name="contact_number" inputmode="tel" style="font-size:13px;">
                     </div>
                 </div>
 
@@ -384,27 +562,27 @@ $months = [
                 </div>
 
                 <div class="row g-2 mb-2">
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="filed" class="form-label mb-1" style="font-size:12px;">Filed</label>
                         <input type="date" class="form-control form-control-sm" id="filed" name="filed" style="font-size:13px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="payment" class="form-label mb-1" style="font-size:12px;">Payment</label>
                         <input type="date" class="form-control form-control-sm" id="payment" name="payment" style="font-size:13px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="received_in_rsso" class="form-label mb-1" style="font-size:12px;">Received in RSSO</label>
                         <input type="date" class="form-control form-control-sm" id="received_in_rsso" name="received_in_rsso" style="font-size:13px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="processed" class="form-label mb-1" style="font-size:12px;">Processed</label>
                         <input type="date" class="form-control form-control-sm" id="processed" name="processed" style="font-size:13px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="approved" class="form-label mb-1" style="font-size:12px;">Approved</label>
                         <input type="date" class="form-control form-control-sm" id="approved" name="approved" style="font-size:13px;">
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-6 col-md-2">
                         <label for="transmitted_to_pso" class="form-label mb-1" style="font-size:12px;">Transmitted to PSO</label>
                         <input type="date" class="form-control form-control-sm" id="transmitted_to_pso" name="transmitted_to_pso" style="font-size:13px;">
                     </div>
@@ -416,15 +594,15 @@ $months = [
                         <hr class="flex-grow-1 my-0" style="opacity:.15;">
                     </div>
                     <div class="row g-2">
-                        <div class="col-md-4">
+                        <div class="col-12 col-md-4">
                             <label for="return_to_province_for_compliance" class="form-label mb-1" style="font-size:12px;">Return to Province for Compliance</label>
                             <input type="date" class="form-control form-control-sm" id="return_to_province_for_compliance" name="return_to_province_for_compliance" style="font-size:13px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-6 col-md-4">
                             <label for="complied" class="form-label mb-1" style="font-size:12px;">Complied</label>
                             <input type="date" class="form-control form-control-sm" id="complied" name="complied" style="font-size:13px;">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-6 col-md-4">
                             <label for="received_in_rsso_after_compliance" class="form-label mb-1" style="font-size:12px;">Received in RSSO After Compliance</label>
                             <input type="date" class="form-control form-control-sm" id="received_in_rsso_after_compliance" name="received_in_rsso_after_compliance" style="font-size:13px;">
                         </div>
@@ -437,7 +615,7 @@ $months = [
 
             </div>
             <div class="modal-footer py-2">
-                <button type="submit" class="btn btn-sm text-white px-5" style="background-color:#0a1f44;font-size:13px;">Save</button>
+                <button type="submit" class="btn btn-sm text-white px-5 btn-save" style="background-color:#0a1f44;font-size:13px;">Save</button>
             </div>
         </form>
     </div>
@@ -456,7 +634,7 @@ $months = [
 </div>
 
 <div class="modal fade" id="deleteAuthorityModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold">Delete Authority Record</h5>
@@ -466,6 +644,7 @@ $months = [
                 <p class="mb-0">Are you sure you want to delete this authority record? This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteAuthority">Delete</button>
             </div>
         </div>
@@ -500,6 +679,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const paginationInfo = document.getElementById('paginationInfo');
     const authorityTotal = document.getElementById('authorityTotal');
     let currentPage = 1;
+
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
     function isDateRangeActive() {
         return !!(filterDateFrom.value || filterDateTo.value);
@@ -688,41 +876,39 @@ document.addEventListener('DOMContentLoaded', function () {
     function renderPagination(totalPages) {
         paginationControls.innerHTML = '';
 
-        const prevItem = document.createElement('li');
-        prevItem.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
-        prevItem.innerHTML = '<a class="page-link" href="#">Previous</a>';
-        prevItem.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-            }
-        });
-        paginationControls.appendChild(prevItem);
-
-        for (let i = 1; i <= totalPages; i++) {
-            const pageItem = document.createElement('li');
-            pageItem.className = 'page-item' + (currentPage === i ? ' active' : '');
-            pageItem.innerHTML = '<a class="page-link" href="#">' + i + '</a>';
-            pageItem.addEventListener('click', function (e) {
+        function addItem(label, page, disabled, active) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+            li.innerHTML = '<a class="page-link" href="#">' + label + '</a>';
+            li.addEventListener('click', function (e) {
                 e.preventDefault();
-                currentPage = i;
+                if (disabled || page === currentPage) return;
+                currentPage = page;
                 renderTable();
             });
-            paginationControls.appendChild(pageItem);
+            paginationControls.appendChild(li);
         }
 
-        const nextItem = document.createElement('li');
-        nextItem.className = 'page-item' + (currentPage === totalPages ? ' disabled' : '');
-        nextItem.innerHTML = '<a class="page-link" href="#">Next</a>';
-        nextItem.addEventListener('click', function (e) {
-            e.preventDefault();
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-            }
-        });
-        paginationControls.appendChild(nextItem);
+        addItem('Prev', currentPage - 1, currentPage === 1, false);
+
+        const start = Math.max(1, currentPage - 1);
+        const end = Math.min(totalPages, currentPage + 1);
+
+        if (start > 1) {
+            addItem('1', 1, false, false);
+            if (start > 2) addItem('&hellip;', 0, true, false);
+        }
+
+        for (let i = start; i <= end; i++) {
+            addItem(String(i), i, false, i === currentPage);
+        }
+
+        if (end < totalPages) {
+            if (end < totalPages - 1) addItem('&hellip;', 0, true, false);
+            addItem(String(totalPages), totalPages, false, false);
+        }
+
+        addItem('Next', currentPage + 1, currentPage === totalPages, false);
     }
 
     [searchInput, filterProvince, filterSect, filterType, filterSex, filterSort].forEach(function (control) {
@@ -784,6 +970,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteAuthorityModal'));
     const viewModal = new bootstrap.Modal(document.getElementById('viewAuthorityModal'));
     const addModal = document.getElementById('addAuthorityModal');
+    const addModalInstance = new bootstrap.Modal(addModal);
     const authorityForm = document.getElementById('authorityForm');
 
     document.querySelectorAll('.delete-authority').forEach(function (link) {
@@ -806,7 +993,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const labels = ['No.', 'CRASM#', 'Name of SO', 'Province', 'Type', 'Religious Sect', 'Sex', 'Church Address', 'Contact No.', 'Position', 'Approved'];
         let html = '<div class="row g-3">';
         labels.forEach(function (label, index) {
-            html += '<div class="col-md-6"><div class="text-muted small">' + label + '</div><div class="fw-semibold">' + cells[index].textContent.trim() + '</div></div>';
+            html += '<div class="col-6 col-md-6"><div class="text-muted small">' + label + '</div><div class="fw-semibold text-break">' + escapeHtml(cells[index].textContent.trim()) + '</div></div>';
         });
         html += '</div>';
         document.getElementById('viewAuthorityBody').innerHTML = html;
@@ -846,7 +1033,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             authorityForm.action = '../actions/authority_update.php';
             document.querySelector('#addAuthorityModal .modal-title').textContent = 'Edit Authority';
-            new bootstrap.Modal(addModal).show();
+            addModalInstance.show();
             updateComplianceFieldsVisibility();
         });
     });
