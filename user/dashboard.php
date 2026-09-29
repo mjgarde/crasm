@@ -2,15 +2,15 @@
 
 session_start();
 
-if (!isset($_SESSION['admin_id'])) {
+if (!isset($_SESSION['user_id'])) {
     header('Location: ../login.php');
     exit;
 }
 
 require_once '../config/database.php';
 
-$adminUsername = $_SESSION['admin_username'] ?? 'Administrator';
-$adminInitial  = strtoupper(substr($adminUsername, 0, 1));
+$userUsername = $_SESSION['user_username'] ?? 'User';
+$userInitial  = strtoupper(substr($userUsername, 0, 1));
 
 $database = new Database();
 $db = $database->connect();
@@ -211,7 +211,7 @@ $quarterRenewalData = array_map(fn($v) => $v['Renewal'], array_values($quarterly
 </head>
 <body>
 
-<?php require __DIR__ . '/../includes/navbar.php'; ?>
+<?php require __DIR__ . '/../includes/user_navbar.php'; ?>
 
 <div class="min-vh-100">
 
