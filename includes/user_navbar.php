@@ -20,7 +20,7 @@ $base    = rtrim(str_replace($docRoot, '', $appRoot), '/');
 >
     <div class="container-fluid px-3">
 
-        <a class="navbar-brand d-flex align-items-center" href="<?= htmlspecialchars($base) ?>/admin/dashboard.php">
+        <a class="navbar-brand d-flex align-items-center" href="<?= htmlspecialchars($base) ?>/user/dashboard.php">
             <img
                 src="<?= htmlspecialchars($base) ?>/assets/img/logo.png"
                 alt="Seal"
@@ -55,7 +55,7 @@ $base    = rtrim(str_replace($docRoot, '', $appRoot), '/');
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0" style="font-size:12px;">
 
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/admin/dashboard.php" title="Dashboard">
+                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/user/dashboard.php" title="Dashboard">
                         <i class="fa-solid fa-gauge-high" style="width:16px;font-size:12px;flex-shrink:0;"></i>
                         Dashboard
                     </a>
@@ -66,7 +66,7 @@ $base    = rtrim(str_replace($docRoot, '', $appRoot), '/');
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/admin/authority.php" title="Authority">
+                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/user/authority.php" title="Authority">
                         <i class="fa-solid fa-user-shield" style="width:16px;font-size:12px;flex-shrink:0;"></i>
                         Authority
                     </a>
@@ -77,7 +77,7 @@ $base    = rtrim(str_replace($docRoot, '', $appRoot), '/');
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/admin/reports.php" title="Reports">
+                    <a class="nav-link d-flex align-items-center gap-1" href="<?= htmlspecialchars($base) ?>/user/reports.php" title="Reports">
                         <i class="fa-solid fa-chart-column" style="width:16px;font-size:12px;flex-shrink:0;"></i>
                         Reports
                     </a>
