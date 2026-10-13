@@ -171,11 +171,18 @@ $csrfToken    = $_SESSION['csrf_token'];
 $currentPage  = basename($_SERVER['SCRIPT_NAME']);
 
 $navItems = [
-    ['file' => 'dashboard.php', 'label' => 'Dashboard',          'icon' => 'fa-gauge-high'],
-    ['file' => 'authority.php', 'label' => 'Authority',          'icon' => 'fa-user-shield'],
-    ['file' => 'reports.php',   'label' => 'Reports',            'icon' => 'fa-chart-column'],
-    ['file' => 'users.php',     'label' => 'Users',              'icon' => 'fa-users'],
-    ['file' => 'backup.php',    'label' => 'Backup & Recovery',  'icon' => 'fa-database'],
+    ['file' => 'dashboard.php', 'label' => 'Dashboard', 'icon' => 'fa-gauge-high'],
+    ['file' => 'authority.php', 'label' => 'Authority', 'icon' => 'fa-user-shield'],
+    [
+        'label'    => 'Reports',
+        'icon'     => 'fa-chart-column',
+        'children' => [
+            ['file' => 'reports.php',       'label' => 'CRASM Reports', 'icon' => 'fa-file-lines',     'desc' => 'Certificate of Registration of Authority'],
+            ['file' => 'dsois_reports.php', 'label' => 'DSOIS Form 2',  'icon' => 'fa-file-signature', 'desc' => 'Form 2 report'],
+        ],
+    ],
+    ['file' => 'users.php',  'label' => 'Users',             'icon' => 'fa-users'],
+    ['file' => 'backup.php', 'label' => 'Backup & Recovery', 'icon' => 'fa-database'],
 ];
 ?>
 
@@ -201,20 +208,58 @@ $navItems = [
 
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0" style="font-size:12px;">
                 <?php foreach ($navItems as $i => $item): ?>
+                    <?php
+                        $hasChildren = !empty($item['children']);
+                        $isActive = $hasChildren
+                            ? in_array($currentPage, array_column($item['children'], 'file'), true)
+                            : $currentPage === $item['file'];
+                    ?>
+
                     <?php if ($i > 0): ?>
                     <li class="nav-item d-none d-lg-flex align-items-center">
                         <span style="color:rgba(255,255,255,.3);">|</span>
                     </li>
                     <?php endif; ?>
+
+                    <?php if ($hasChildren): ?>
+                    <li class="nav-item dropdown crasm-nav-dropdown">
+                        <a class="nav-link d-flex align-items-center gap-1 dropdown-toggle<?= $isActive ? ' is-current' : '' ?>"
+                           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                           title="<?= htmlspecialchars($item['label']) ?>">
+                            <i class="fa-solid <?= $item['icon'] ?>" style="width:16px;font-size:12px;flex-shrink:0;"></i>
+                            <?= htmlspecialchars($item['label']) ?>
+                            <i class="fa-solid fa-chevron-down nav-caret"></i>
+                        </a>
+                        <ul class="dropdown-menu crasm-dropdown shadow border-0">
+                            <?php foreach ($item['children'] as $child): ?>
+                                <?php $childActive = $currentPage === $child['file']; ?>
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2<?= $childActive ? ' active' : '' ?>"
+                                       href="<?= $child['file'] ?>"
+                                       <?= $childActive ? 'aria-current="page"' : '' ?>>
+                                        <span class="dd-icon"><i class="fa-solid <?= $child['icon'] ?>"></i></span>
+                                        <span class="dd-text">
+                                            <span class="dd-title"><?= htmlspecialchars($child['label']) ?></span>
+                                            <?php if (!empty($child['desc'])): ?>
+                                                <span class="dd-desc"><?= htmlspecialchars($child['desc']) ?></span>
+                                            <?php endif; ?>
+                                        </span>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php else: ?>
                     <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center gap-1<?= $currentPage === $item['file'] ? ' is-current' : '' ?>"
+                        <a class="nav-link d-flex align-items-center gap-1<?= $isActive ? ' is-current' : '' ?>"
                            href="<?= $item['file'] ?>"
                            title="<?= htmlspecialchars($item['label']) ?>"
-                           <?= $currentPage === $item['file'] ? 'aria-current="page"' : '' ?>>
+                           <?= $isActive ? 'aria-current="page"' : '' ?>>
                             <i class="fa-solid <?= $item['icon'] ?>" style="width:16px;font-size:12px;flex-shrink:0;"></i>
                             <?= htmlspecialchars($item['label']) ?>
                         </a>
                     </li>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </ul>
 
@@ -375,6 +420,18 @@ $navItems = [
         color: #fff;
     }
 
+    .crasm-navbar .navbar-nav .nav-link:focus,
+    .crasm-navbar .navbar-nav .nav-link:active,
+    .crasm-navbar .navbar-nav .nav-link.show,
+    .crasm-navbar .navbar-nav .show > .nav-link {
+        color: #fff;
+        outline: none;
+    }
+
+    .crasm-navbar .navbar-nav .nav-link:focus-visible {
+        box-shadow: none;
+    }
+
     .crasm-navbar .dropdown-toggle::after {
         display: none;
     }
@@ -389,6 +446,78 @@ $navItems = [
         font-size: 9px;
         white-space: nowrap;
         color: rgba(255, 255, 255, .7);
+    }
+
+    .crasm-navbar .nav-caret {
+        font-size: 8px;
+        margin-left: 2px;
+        transition: transform .2s ease;
+    }
+
+    .crasm-navbar .crasm-nav-dropdown .nav-link.show .nav-caret {
+        transform: rotate(180deg);
+    }
+
+    .crasm-dropdown {
+        min-width: 260px;
+        padding: .35rem;
+        margin-top: .5rem;
+        border-radius: 8px;
+        border-top: 3px solid #d4a017 !important;
+        font-size: 12px;
+    }
+
+    .crasm-dropdown .dropdown-item {
+        padding: .55rem .65rem;
+        border-radius: 6px;
+        color: #222;
+        white-space: normal;
+    }
+
+    .crasm-dropdown .dropdown-item:hover,
+    .crasm-dropdown .dropdown-item:focus {
+        background-color: #eef3fa;
+        color: #002d62;
+    }
+
+    .crasm-dropdown .dropdown-item.active {
+        background-color: #002d62;
+        color: #fff;
+    }
+
+    .crasm-dropdown .dd-icon {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background-color: #eef3fa;
+        color: #002d62;
+        font-size: 13px;
+    }
+
+    .crasm-dropdown .dropdown-item.active .dd-icon {
+        background-color: rgba(255, 255, 255, .15);
+        color: #d4a017;
+    }
+
+    .crasm-dropdown .dd-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .crasm-dropdown .dd-title {
+        font-weight: 600;
+        font-size: 12.5px;
+    }
+
+    .crasm-dropdown .dd-desc {
+        font-size: 10px;
+        opacity: .7;
+        margin-top: 2px;
     }
 
     @media (max-width: 991.98px) {
@@ -434,6 +563,31 @@ $navItems = [
         .crasm-navbar .navbar-nav .nav-link.is-current {
             color: #fff;
             font-weight: 600;
+        }
+
+        .crasm-dropdown {
+            position: static !important;
+            transform: none !important;
+            margin: 0 0 .5rem .5rem;
+            background-color: rgba(255, 255, 255, .08);
+            border-top: 0 !important;
+            border-left: 2px solid #d4a017 !important;
+            border-radius: 0;
+            box-shadow: none !important;
+        }
+
+        .crasm-dropdown .dropdown-item {
+            color: rgba(255, 255, 255, .85);
+        }
+
+        .crasm-dropdown .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, .1);
+            color: #fff;
+        }
+
+        .crasm-dropdown .dd-icon {
+            background-color: rgba(255, 255, 255, .12);
+            color: #d4a017;
         }
     }
 

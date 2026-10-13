@@ -263,11 +263,8 @@ $months = [
                         <option value="oldest">Oldest to Newest</option>
                     </select>
 
-                    <button type="button" id="exportWordBtn" class="btn btn-sm text-white" style="background-color:#2b5797;white-space:nowrap;">
-                        <i class="fa-solid fa-file-word me-1"></i> Word
-                    </button>
                     <button type="button" class="btn btn-sm text-white" style="background-color:#0a1f44;white-space:nowrap;" data-bs-toggle="modal" data-bs-target="#addAuthorityModal">
-                        <i class="fa-solid fa-plus me-1"></i> Add
+                        <i class="fa-solid fa-plus me-1"></i> Add Authority
                     </button>
                 </div>
 
@@ -945,26 +942,6 @@ document.addEventListener('DOMContentLoaded', function () {
     syncFilterAvailability();
     updateFilterCount();
     renderTable();
-
-    const exportWordBtn = document.getElementById('exportWordBtn');
-    exportWordBtn.addEventListener('click', function () {
-        const params = new URLSearchParams();
-        if (filterProvince.value) params.set('province', filterProvince.value);
-        if (filterSect.value) params.set('sect', filterSect.value);
-        if (filterType.value) params.set('type', filterType.value);
-        if (filterSex.value) params.set('sex', filterSex.value);
-
-        if (isDateRangeActive()) {
-            if (filterDateFrom.value) params.set('date_from', filterDateFrom.value);
-            if (filterDateTo.value) params.set('date_to', filterDateTo.value);
-        } else {
-            if (filterMonth.value) params.set('month', filterMonth.value);
-            if (filterYear.value) params.set('year', filterYear.value);
-        }
-
-        const query = params.toString();
-        window.location.href = '../actions/authority_export_word.php' + (query ? '?' + query : '');
-    });
 
     let deleteTargetId = null;
     const deleteModal = new bootstrap.Modal(document.getElementById('deleteAuthorityModal'));
